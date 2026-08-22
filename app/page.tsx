@@ -13,12 +13,14 @@ export default function Home() {
   const [explanations, setExplanations] = useState<Explanation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setExplanations([]);
+    setSubmitted(false);
 
     try {
       const res = await fetch("/api/explain", {
@@ -33,6 +35,7 @@ export default function Home() {
       }
 
       setExplanations(data.explanations);
+      setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -59,6 +62,8 @@ export default function Home() {
       </form>
 
       {error && <p>Error: {error}</p>}
+
+      {submitted && explanations.length === 0 && <p>No implicit language found.</p>}
 
       {explanations.length > 0 && (
         <ul>
