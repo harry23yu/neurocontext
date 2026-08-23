@@ -15,6 +15,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
+  function handleClear() {
+    setText("");
+    setExplanations([]);
+    setError(null);
+    setSubmitted(false);
+  }
+
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     setLoading(true);
@@ -57,6 +64,9 @@ export default function Home() {
         <div>
           <button type="submit" disabled={loading || !text.trim()}>
             {loading ? "Explaining..." : "Explain"}
+          </button>
+          <button type="button" onClick={handleClear} disabled={loading}>
+            Clear
           </button>
         </div>
       </form>
