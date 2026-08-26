@@ -59,8 +59,10 @@ export default function Home() {
           onChange={(e) => setText(e.target.value)}
           rows={8}
           cols={60}
+          maxLength={200}
           placeholder="Paste text containing idioms, sarcasm, or social cues..."
         />
+        <div>{text.length}/200 characters</div>
         <div>
           <button type="submit" disabled={loading || !text.trim()}>
             {loading ? "Explaining..." : "Explain"}
