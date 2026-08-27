@@ -8,18 +8,47 @@ type Explanation = {
   explanation: string;
 };
 
+const MAX_PDF_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB
+
 export default function Home() {
+  const [mode, setMode] = useState<"text" | "pdf">("text");
+
   const [text, setText] = useState("");
   const [explanations, setExplanations] = useState<Explanation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfError, setPdfError] = useState<string | null>(null);
+
   function handleClear() {
     setText("");
     setExplanations([]);
     setError(null);
     setSubmitted(false);
+  }
+
+  function handlePdfChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    setPdfFile(null);
+    setPdfError(null);
+
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      setPdfError("Please select a PDF file.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_PDF_SIZE_BYTES) {
+      setPdfError("PDF must be 1 MB or smaller.");
+      e.target.value = "";
+      return;
+    }
+
+    setPdfFile(file);
   }
 
   async function handleSubmit(e: React.SubmitEvent) {
@@ -53,25 +82,46 @@ export default function Home() {
   return (
     <div>
       <h1>NeuroContext</h1>
-      <form onSubmit={handleSubmit}>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={8}
-          cols={60}
-          maxLength={200}
-          placeholder="Paste text containing idioms, sarcasm, or social cues..."
-        />
-        <div>{text.length}/200 characters</div>
-        <div>
-          <button type="submit" disabled={loading || !text.trim()}>
-            Explain
-          </button>
-          <button type="button" onClick={handleClear} disabled={loading}>
-            Clear
-          </button>
-        </div>
-      </form>
+
+      <div>
+        <button type="button" onClick={() => setMode("text")} disabled={mode === "text"}>
+          Paste text
+        </button>
+        <button type="button" onClick={() => setMode("pdf")} disabled={mode === "pdf"}>
+          Upload PDF
+        </button>
+      </div>
+
+      {mode === "text" && (
+        <form onSubmit={handleSubmit}>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={8}
+            cols={60}
+            maxLength={200}
+            placeholder="Paste text containing idioms, sarcasm, or social cues..."
+          />
+          <div>{text.length}/200 characters</div>
+          <div>
+            <button type="submit" disabled={loading || !text.trim()}>
+              Explain
+            </button>
+            <button type="button" onClick={handleClear} disabled={loading}>
+              Clear
+            </button>
+          </div>
+        </form>
+      )}
+
+      {mode === "pdf" && (
+        <form>
+          <input type="file" accept="application/pdf" onChange={handlePdfChange} />
+          <div>Max size: 1 MB</div>
+          {pdfError && <p>Error: {pdfError}</p>}
+          {pdfFile && !pdfError && <p>PDF file selected</p>}
+        </form>
+      )}
 
       {loading && (
         <div
