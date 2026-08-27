@@ -65,13 +65,28 @@ export default function Home() {
         <div>{text.length}/200 characters</div>
         <div>
           <button type="submit" disabled={loading || !text.trim()}>
-            {loading ? "Explaining..." : "Explain"}
+            Explain
           </button>
           <button type="button" onClick={handleClear} disabled={loading}>
             Clear
           </button>
         </div>
       </form>
+
+      {loading && (
+        <div
+          role="status"
+          aria-label="Loading"
+          style={{
+            width: 24,
+            height: 24,
+            border: "3px solid #ccc",
+            borderTopColor: "#333",
+            borderRadius: "50%",
+          }}
+          className="animate-spin"
+        />
+      )}
 
       {error && <p>Error: {error}</p>}
 
