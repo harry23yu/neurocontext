@@ -21,6 +21,8 @@ export default function Home() {
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfText, setPdfText] = useState<string | null>(null);
 
   function handleClear() {
     setText("");
@@ -49,6 +51,34 @@ export default function Home() {
     }
 
     setPdfFile(file);
+    setPdfText(null);
+  }
+
+  async function handlePdfSubmit(e: React.SubmitEvent) {
+    e.preventDefault();
+    if (!pdfFile) return;
+
+    setPdfLoading(true);
+    setPdfError(null);
+    setPdfText(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", pdfFile);
+
+      const res = await fetch("/api/pdf", { method: "POST", body: formData });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      setPdfText(data.text);
+    } catch (err) {
+      setPdfError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setPdfLoading(false);
+    }
   }
 
   async function handleSubmit(e: React.SubmitEvent) {
@@ -115,12 +145,36 @@ export default function Home() {
       )}
 
       {mode === "pdf" && (
-        <form>
+        <form onSubmit={handlePdfSubmit}>
           <input type="file" accept="application/pdf" onChange={handlePdfChange} />
           <div>Max size: 1 MB</div>
           {pdfError && <p>Error: {pdfError}</p>}
           {pdfFile && !pdfError && <p>PDF file selected</p>}
+          <div>
+            <button type="submit" disabled={pdfLoading || !pdfFile || !!pdfError}>
+              Extract text
+            </button>
+          </div>
         </form>
+      )}
+
+      {pdfLoading && (
+        <div
+          role="status"
+          aria-label="Loading"
+          style={{
+            width: 24,
+            height: 24,
+            border: "3px solid #ccc",
+            borderTopColor: "#333",
+            borderRadius: "50%",
+          }}
+          className="animate-spin"
+        />
+      )}
+
+      {pdfText !== null && (
+        <pre style={{ whiteSpace: "pre-wrap" }}>{pdfText}</pre>
       )}
 
       {loading && (
