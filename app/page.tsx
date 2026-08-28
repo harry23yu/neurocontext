@@ -8,6 +8,11 @@ type Explanation = {
   explanation: string;
 };
 
+type Summary = {
+  summary: string;
+  keyPoints: string[];
+};
+
 const MAX_PDF_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB
 
 export default function Home() {
@@ -23,6 +28,7 @@ export default function Home() {
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfText, setPdfText] = useState<string | null>(null);
+  const [pdfSummary, setPdfSummary] = useState<Summary | null>(null);
 
   function handleClear() {
     setText("");
@@ -52,6 +58,7 @@ export default function Home() {
 
     setPdfFile(file);
     setPdfText(null);
+    setPdfSummary(null);
   }
 
   async function handlePdfSubmit(e: React.SubmitEvent) {
@@ -61,19 +68,33 @@ export default function Home() {
     setPdfLoading(true);
     setPdfError(null);
     setPdfText(null);
+    setPdfSummary(null);
 
     try {
       const formData = new FormData();
       formData.append("file", pdfFile);
 
-      const res = await fetch("/api/pdf", { method: "POST", body: formData });
-      const data = await res.json();
+      const pdfRes = await fetch("/api/pdf", { method: "POST", body: formData });
+      const pdfData = await pdfRes.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || "Something went wrong");
+      if (!pdfRes.ok) {
+        throw new Error(pdfData.error || "Something went wrong");
       }
 
-      setPdfText(data.text);
+      setPdfText(pdfData.text);
+
+      const summarizeRes = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: pdfData.text }),
+      });
+      const summarizeData = await summarizeRes.json();
+
+      if (!summarizeRes.ok) {
+        throw new Error(summarizeData.error || "Something went wrong");
+      }
+
+      setPdfSummary(summarizeData);
     } catch (err) {
       setPdfError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -171,6 +192,19 @@ export default function Home() {
           }}
           className="animate-spin"
         />
+      )}
+
+      {pdfSummary && (
+        <div>
+          <h2>Summary</h2>
+          <p>{pdfSummary.summary}</p>
+          <h3>Key Points</h3>
+          <ul>
+            {pdfSummary.keyPoints.map((point, i) => (
+              <li key={i}>{point}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {pdfText !== null && (
