@@ -29,6 +29,7 @@ export default function Home() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfText, setPdfText] = useState<string | null>(null);
   const [pdfSummary, setPdfSummary] = useState<Summary | null>(null);
+  const [pdfExplanations, setPdfExplanations] = useState<Explanation[]>([]);
 
   function handleClear() {
     setText("");
@@ -59,6 +60,7 @@ export default function Home() {
     setPdfFile(file);
     setPdfText(null);
     setPdfSummary(null);
+    setPdfExplanations([]);
   }
 
   async function handlePdfSubmit(e: React.SubmitEvent) {
@@ -69,6 +71,7 @@ export default function Home() {
     setPdfError(null);
     setPdfText(null);
     setPdfSummary(null);
+    setPdfExplanations([]);
 
     try {
       const formData = new FormData();
@@ -95,6 +98,19 @@ export default function Home() {
       }
 
       setPdfSummary(summarizeData);
+
+      const explainRes = await fetch("/api/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: pdfData.text }),
+      });
+      const explainData = await explainRes.json();
+
+      if (!explainRes.ok) {
+        throw new Error(explainData.error || "Something went wrong");
+      }
+
+      setPdfExplanations(explainData.explanations);
     } catch (err) {
       setPdfError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -202,6 +218,21 @@ export default function Home() {
           <ul>
             {pdfSummary.keyPoints.map((point, i) => (
               <li key={i}>{point}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {pdfSummary && pdfExplanations.length === 0 && <p>No implicit language found.</p>}
+
+      {pdfExplanations.length > 0 && (
+        <div>
+          <h3>Implicit Language Found</h3>
+          <ul>
+            {pdfExplanations.map((item, i) => (
+              <li key={i}>
+                <strong>{item.phrase}</strong> ({item.type}): {item.explanation}
+              </li>
             ))}
           </ul>
         </div>
