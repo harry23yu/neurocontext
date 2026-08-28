@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   }
 
   const response = await client.messages.create({
-    model: "claude-opus-5",
+    model: "claude-haiku-4-5-20251001",
     max_tokens: 2000,
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content: text }],
@@ -37,5 +37,12 @@ export async function POST(request: Request) {
     return Response.json({ error: "No text response from model" }, { status: 502 });
   }
 
-  return Response.json(JSON.parse(block.text));
+  let jsonText = block.text.trim();
+  if (jsonText.startsWith("```json")) {
+    jsonText = jsonText.slice(7).trimStart();
+    const endIdx = jsonText.lastIndexOf("```");
+    if (endIdx !== -1) jsonText = jsonText.slice(0, endIdx).trimEnd();
+  }
+
+  return Response.json(JSON.parse(jsonText));
 }
