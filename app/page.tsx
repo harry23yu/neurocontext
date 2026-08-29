@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import styles from "./page.module.css";
 
 type Explanation = {
   phrase: string;
@@ -147,34 +148,36 @@ export default function Home() {
   }
 
   return (
-    <div>
-      <h1>NeuroContext</h1>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1>NeuroContext</h1>
+      </div>
 
-      <div>
-        <button type="button" onClick={() => setMode("text")} disabled={mode === "text"}>
+      <div className={styles.modeToggle}>
+        <button type="button" className={styles.modeButton} onClick={() => setMode("text")} disabled={mode === "text"}>
           Paste text
         </button>
-        <button type="button" onClick={() => setMode("pdf")} disabled={mode === "pdf"}>
+        <button type="button" className={styles.modeButton} onClick={() => setMode("pdf")} disabled={mode === "pdf"}>
           Upload PDF
         </button>
       </div>
 
       {mode === "text" && (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className={styles.formSection}>
           <textarea
+            className={styles.textarea}
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={8}
-            cols={60}
             maxLength={200}
             placeholder="Paste text containing idioms, sarcasm, or social cues..."
           />
-          <div>{text.length}/200 characters</div>
-          <div>
-            <button type="submit" disabled={loading || !text.trim()}>
+          <div className={styles.charCount}>{text.length}/200 characters</div>
+          <div className={styles.buttonGroup}>
+            <button type="submit" className={`${styles.button} ${styles.submitButton}`} disabled={loading || !text.trim()}>
               Explain
             </button>
-            <button type="button" onClick={handleClear} disabled={loading}>
+            <button type="button" className={`${styles.button} ${styles.clearButton}`} onClick={handleClear} disabled={loading}>
               Clear
             </button>
           </div>
@@ -182,13 +185,13 @@ export default function Home() {
       )}
 
       {mode === "pdf" && (
-        <form onSubmit={handlePdfSubmit}>
-          <input type="file" accept="application/pdf" onChange={handlePdfChange} />
-          <div>Max size: 1 MB</div>
-          {pdfError && <p>Error: {pdfError}</p>}
+        <form onSubmit={handlePdfSubmit} className={styles.formSection}>
+          <input type="file" className={styles.fileInput} accept="application/pdf" onChange={handlePdfChange} />
+          <div className={styles.sizeHint}>Max size: 1 MB</div>
+          {pdfError && <p className={styles.error}>{pdfError}</p>}
           {pdfFile && !pdfError && <p>PDF file selected</p>}
-          <div>
-            <button type="submit" disabled={pdfLoading || !pdfFile || !!pdfError}>
+          <div className={styles.buttonGroup}>
+            <button type="submit" className={`${styles.button} ${styles.submitButton}`} disabled={pdfLoading || !pdfFile || !!pdfError}>
               Extract text
             </button>
           </div>
@@ -199,23 +202,16 @@ export default function Home() {
         <div
           role="status"
           aria-label="Loading"
-          style={{
-            width: 24,
-            height: 24,
-            border: "3px solid #ccc",
-            borderTopColor: "#333",
-            borderRadius: "50%",
-          }}
-          className="animate-spin"
+          className={`${styles.spinner} animate-spin`}
         />
       )}
 
       {pdfSummary && (
-        <div>
+        <div className={styles.resultsSection}>
           <h2>Summary</h2>
           <p>{pdfSummary.summary}</p>
           <h3>Key Points</h3>
-          <ul>
+          <ul className={styles.keyPoints}>
             {pdfSummary.keyPoints.map((point, i) => (
               <li key={i}>{point}</li>
             ))}
@@ -223,12 +219,12 @@ export default function Home() {
         </div>
       )}
 
-      {pdfSummary && pdfExplanations.length === 0 && <p>No implicit language found.</p>}
+      {pdfSummary && pdfExplanations.length === 0 && <p className={styles.noImplicit}>No implicit language found.</p>}
 
       {pdfExplanations.length > 0 && (
-        <div>
+        <div className={styles.resultsSection}>
           <h3>Implicit Language Found</h3>
-          <ul>
+          <ul className={styles.resultsList}>
             {pdfExplanations.map((item, i) => (
               <li key={i}>
                 <strong>{item.phrase}</strong> ({item.type}): {item.explanation}
@@ -239,36 +235,32 @@ export default function Home() {
       )}
 
       {pdfText !== null && (
-        <pre style={{ whiteSpace: "pre-wrap" }}>{pdfText}</pre>
+        <pre className={styles.pdfText}>{pdfText}</pre>
       )}
 
       {loading && (
         <div
           role="status"
           aria-label="Loading"
-          style={{
-            width: 24,
-            height: 24,
-            border: "3px solid #ccc",
-            borderTopColor: "#333",
-            borderRadius: "50%",
-          }}
-          className="animate-spin"
+          className={`${styles.spinner} animate-spin`}
         />
       )}
 
-      {error && <p>Error: {error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
 
-      {submitted && explanations.length === 0 && <p>No implicit language found.</p>}
+      {submitted && explanations.length === 0 && <p className={styles.noImplicit}>No implicit language found.</p>}
 
       {explanations.length > 0 && (
-        <ul>
-          {explanations.map((item, i) => (
-            <li key={i}>
-              <strong>{item.phrase}</strong> ({item.type}): {item.explanation}
-            </li>
-          ))}
-        </ul>
+        <div className={styles.resultsSection}>
+          <h3>Implicit Language Found</h3>
+          <ul className={styles.resultsList}>
+            {explanations.map((item, i) => (
+              <li key={i}>
+                <strong>{item.phrase}</strong> ({item.type}): {item.explanation}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
