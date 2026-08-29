@@ -208,9 +208,10 @@ export default function Home() {
 
       {pdfSummary && (
         <div className={styles.resultsSection}>
-          <h2>Summary</h2>
+          <h2 className={styles.sectionName}>Summary</h2>
           <p>{pdfSummary.summary}</p>
-          <h3>Key Points</h3>
+          <br></br>
+          <h2 className={styles.sectionName}>Key Points</h2>
           <ul className={styles.keyPoints}>
             {pdfSummary.keyPoints.map((point, i) => (
               <li key={i}>{point}</li>
@@ -223,7 +224,7 @@ export default function Home() {
 
       {pdfExplanations.length > 0 && (
         <div className={styles.resultsSection}>
-          <h3>Implicit Language Found</h3>
+          <h3 className={styles.sectionName}>Implicit Language in the PDF</h3>
           <ul className={styles.resultsList}>
             {pdfExplanations.map((item, i) => (
               <li key={i}>
@@ -252,7 +253,7 @@ export default function Home() {
 
       {explanations.length > 0 && (
         <div className={styles.resultsSection}>
-          <h3>Implicit Language Found</h3>
+          <h3 className={styles.sectionName}>Implicit Language in the Text</h3>
           <ul className={styles.resultsList}>
             {explanations.map((item, i) => (
               <li key={i}>
