@@ -186,7 +186,13 @@ export default function Home() {
 
       {mode === "pdf" && (
         <form onSubmit={handlePdfSubmit} className={styles.formSection}>
-          <input type="file" className={styles.fileInput} accept="application/pdf" onChange={handlePdfChange} />
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <label className={styles.fileLabel}>
+              Choose File
+              <input type="file" className={styles.fileInput} accept="application/pdf" onChange={handlePdfChange} />
+            </label>
+            <span>{pdfFile?.name || "No file chosen"}</span>
+          </div>
           <div className={styles.sizeHint}>Max size: 1 MB</div>
           {pdfError && <p className={styles.error}>{pdfError}</p>}
           {pdfFile && !pdfError && <p>PDF file selected</p>}
