@@ -18,61 +18,86 @@
 }
 
 .modeToggle {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 2rem;
+  display: inline-flex;
+  padding: 4px;
+  background: #1b1f2a;
+  border: 1px solid #2a2f3d;
+  border-radius: 999px;
+  margin-bottom: 28px;
+  gap: 4px;
 }
 
 .modeButton {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  background: white;
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #8b8fa3;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 18px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .modeButton:hover:not(:disabled) {
-  border-color: #0066cc;
-  color: #0066cc;
+  color: #e8e9ed;
 }
 
 .modeButton:disabled {
-  border-color: #0066cc;
-  background: #0066cc;
-  color: white;
+  background: #4dd0c4;
+  color: #14171f;
   cursor: default;
+  font-weight: 600;
+}
+
+.modeButton:focus-visible {
+  outline: 2px solid #4dd0c4;
+  outline-offset: 2px;
 }
 
 .formSection {
-  background: #f9f9f9;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
+  background: #1b1f2a;
+  border: 1px solid #2a2f3d;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.formSection span {
+  color: #8b8fa3;
 }
 
 .textarea {
   width: 100%;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  font-family: inherit;
   resize: vertical;
-  box-sizing: border-box;
+  background: #14171f;
+  border: 1px solid #2a2f3d;
+  border-radius: 10px;
+  color: #e8e9ed;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  padding: 14px 16px;
+  min-height: 140px;
+  transition: border-color 0.15s ease;
 }
 
-.textarea:focus {
+.textarea::placeholder {
+  color: #4b5163;
+}
+
+.textarea:focus-visible {
   outline: none;
-  border-color: #0066cc;
+  border-color: #4dd0c4;
+  box-shadow: 0 0 0 3px rgba(77, 208, 196, 0.15);
 }
 
 .charCount {
-  font-size: 0.875rem;
-  color: #666;
-  margin: 0.5rem 0 1rem 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: #8b8fa3;
+  text-align: right;
 }
 
 .fileInput {
@@ -80,24 +105,26 @@
 }
 
 .fileLabel {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background: gray;
-  color: white;
-  border: 1px solid #999;
-  border-radius: 4px;
+  appearance: none;
+  border: none;
+  background: #4dd0c4;
+  color: #14171f;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 22px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .fileLabel:hover {
-  background: rgb(100,100,100);
+  background: #3aa89e;
 }
 
 .sizeHint {
   font-size: 0.875rem;
-  color: #666;
+  color: #8b8fa3;
   margin: 0.5rem 0 1rem 0;
 }
 
@@ -117,32 +144,60 @@
 }
 
 .submitButton {
-  background: #0066cc;
-  color: white;
+  appearance: none;
+  border: none;
+  background: #4dd0c4;
+  color: #14171f;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #0052a3;
+  background: #3aa89e;
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .submitButton:disabled {
-  background: #ccc;
+  background: #2a2f3d;
+  color: #8b8fa3;
   cursor: not-allowed;
 }
 
 .clearButton {
-  background: #f0f0f0;
-  color: #333;
-  border: 1px solid #ddd;
+  appearance: none;
+  background: transparent;
+  border: 1px solid #2a2f3d;
+  color: #8b8fa3;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 11px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .clearButton:hover:not(:disabled) {
-  background: #e0e0e0;
+  border-color: #8b8fa3;
+  color: #e8e9ed;
 }
 
 .clearButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.clearButton:focus-visible {
+  outline: 2px solid #4dd0c4;
+  outline-offset: 2px;
 }
 
 .spinner {
@@ -173,8 +228,52 @@
 
 .resultsList {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.resultsItem {
+  background: #f1f0ea;
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  align-items: baseline;
+}
+
+.phrase {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 13.5px;
+  color: #1b1d24;
+  background: rgba(77, 208, 196, 0.16);
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-decoration: underline;
+  text-decoration-color: #3aa89e;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.type {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #565b6b;
+  align-self: center;
+}
+
+.explanation {
+  grid-column: 1 / -1;
+  font-size: 14.5px;
+  color: #1b1d24;
+  line-height: 1.55;
+  margin: 2px 0 0;
 }
 
 .resultsList li {
@@ -240,4 +339,51 @@
 .sectionName {
   font-size: 1.5rem;
   padding-bottom: 1rem;
+}
+
+
+.slogan {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #4dd0c4;
+  margin-bottom: 20px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4dd0c4;
+  box-shadow: 0 0 0 3px rgba(77, 208, 196, 0.18);
+}
+
+.headline {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+  color: #e8e9ed;
+}
+
+.titleFog {
+  color: #8b8fa3;
+  filter: blur(2.5px);
+  opacity: 0.75;
+  font-style: italic;
+  margin-right: 2px;
+}
+
+.titleClear {
+  color: #4dd0c4;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+  text-decoration-color: rgba(77, 208, 196, 0.5);
 }

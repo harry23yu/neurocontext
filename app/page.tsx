@@ -153,6 +153,16 @@ export default function Home() {
         <h1>NeuroContext</h1>
       </div>
 
+      <div className={styles.slogan}>
+        <span className={styles.dot}/>
+        Implicit language, made literal
+      </div>
+
+      <h1 className={styles.headline}>
+        <span className={styles.titleFog}>What they meant</span>{" "}
+        <span className={styles.titleClear}>vs. what they said.</span>
+      </h1>
+
       <div className={styles.modeToggle}>
         <button type="button" className={styles.modeButton} onClick={() => setMode("text")} disabled={mode === "text"}>
           Paste text
@@ -233,8 +243,10 @@ export default function Home() {
           <h3 className={styles.sectionName}>Implicit Language in the PDF</h3>
           <ul className={styles.resultsList}>
             {pdfExplanations.map((item, i) => (
-              <li key={i}>
-                <strong>{item.phrase}</strong> ({item.type}): {item.explanation}
+              <li key={i} className={styles.resultsItem}>
+                <span className={styles.phrase}>{item.phrase}</span>
+                <span className={styles.type}>{item.type}</span>
+                <p className={styles.explanation}>{item.explanation}</p>
               </li>
             ))}
           </ul>
@@ -262,8 +274,10 @@ export default function Home() {
           <h3 className={styles.sectionName}>Implicit Language in the Text</h3>
           <ul className={styles.resultsList}>
             {explanations.map((item, i) => (
-              <li key={i}>
-                <strong>{item.phrase}</strong> ({item.type}): {item.explanation}
+              <li key={i} className={styles.resultsItem}>
+                <span className={styles.phrase}>{item.phrase}</span>
+                <span className={styles.type}>{item.type}</span>
+                <p className={styles.explanation}>{item.explanation}</p>
               </li>
             ))}
           </ul>
