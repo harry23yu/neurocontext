@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
 .container {
   max-width: 900px;
   margin: 0 auto;
@@ -14,7 +16,7 @@
 .header h1 {
   font-size: 2.5rem;
   margin: 0 0 0.5rem 0;
-  color: #1a1a1a;
+  color: #4dd0c4;
 }
 
 .modeToggle {
@@ -383,7 +385,7 @@
 .titleClear {
   color: #4dd0c4;
   text-decoration: underline;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 6px;
   text-underline-offset: 6px;
   text-decoration-color: rgba(77, 208, 196, 0.5);
 }
