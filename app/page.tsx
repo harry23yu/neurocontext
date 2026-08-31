@@ -205,7 +205,7 @@ export default function Home() {
           </div>
           <div className={styles.sizeHint}>Max size: 1 MB</div>
           {pdfError && <p className={styles.error}>{pdfError}</p>}
-          {pdfFile && !pdfError && <p>PDF file selected</p>}
+          {pdfFile && !pdfError && <p className={styles.pdfSelected}>PDF file selected.</p>}
           <div className={styles.buttonGroup}>
             <button type="submit" className={`${styles.button} ${styles.submitButton}`} disabled={pdfLoading || !pdfFile || !!pdfError}>
               Extract text

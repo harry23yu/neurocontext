@@ -319,10 +319,19 @@
 
 .error {
   padding: 1rem;
-  background: #fee;
-  border-left: 3px solid #cc0000;
+  background: #2b1414;
+  border-left: 3px solid #f87171;
   border-radius: 4px;
-  color: #cc0000;
+  color: #f87171;
+  margin-bottom: 1.5rem;
+}
+
+.pdfSelected {
+  padding: 1rem;
+  background: #132b22;
+  border-left: 3px solid #4ade80;
+  border-radius: 4px;
+  color: #4ade80;
   margin-bottom: 1.5rem;
 }
 
