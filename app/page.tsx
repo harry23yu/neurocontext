@@ -231,7 +231,7 @@ export default function Home() {
         </div>
       )}
 
-      {pdfSummary && pdfExplanations.length === 0 && <p className={styles.noImplicit}>No implicit language found.</p>}
+      {pdfSummary && pdfExplanations.length === 0 && !pdfLoading && <p className={styles.noImplicit}>No implicit language found.</p>}
 
       {pdfExplanations.length > 0 && (
         <div className={styles.resultsSection}>
