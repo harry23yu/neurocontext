@@ -335,18 +335,6 @@
   margin-bottom: 1.5rem;
 }
 
-.pdfText {
-  white-space: pre-wrap;
-  background: white;
-  padding: 1rem;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  overflow-x: auto;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-top: 1.5rem;
-}
-
 .sectionName {
   font-size: 1.5rem;
   padding-bottom: 1rem;

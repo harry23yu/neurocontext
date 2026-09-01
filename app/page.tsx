@@ -28,7 +28,6 @@ export default function Home() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfText, setPdfText] = useState<string | null>(null);
   const [pdfSummary, setPdfSummary] = useState<Summary | null>(null);
   const [pdfExplanations, setPdfExplanations] = useState<Explanation[]>([]);
 
@@ -59,7 +58,6 @@ export default function Home() {
     }
 
     setPdfFile(file);
-    setPdfText(null);
     setPdfSummary(null);
     setPdfExplanations([]);
   }
@@ -70,7 +68,6 @@ export default function Home() {
 
     setPdfLoading(true);
     setPdfError(null);
-    setPdfText(null);
     setPdfSummary(null);
     setPdfExplanations([]);
 
@@ -84,8 +81,6 @@ export default function Home() {
       if (!pdfRes.ok) {
         throw new Error(pdfData.error || "Something went wrong");
       }
-
-      setPdfText(pdfData.text);
 
       const summarizeRes = await fetch("/api/summarize", {
         method: "POST",
@@ -251,10 +246,6 @@ export default function Home() {
             ))}
           </ul>
         </div>
-      )}
-
-      {pdfText !== null && (
-        <pre className={styles.pdfText}>{pdfText}</pre>
       )}
 
       {loading && (
