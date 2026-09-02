@@ -15,6 +15,7 @@ type Summary = {
 };
 
 const MAX_PDF_WORD_COUNT = 1000;
+const MAX_PDF_SIZE_BYTES = 1 * 102400;
 
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(word => word.length > 0).length;
@@ -82,6 +83,12 @@ export default function Home() {
 
     if (file.type !== "application/pdf") {
       setPdfError("Please select a PDF file.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_PDF_SIZE_BYTES) {
+      setPdfError("PDF must be 100 KB or smaller.");
       e.target.value = "";
       return;
     }
@@ -307,7 +314,7 @@ export default function Home() {
             </label>
             <span>{pdfFile?.name || "No file chosen"}</span>
           </div>
-          <div className={styles.sizeHint}>Max: 1,000 words</div>
+          <div className={styles.sizeHint}>PDF can't exceed 1,000 words or 100 KB.</div>
           {pdfError && <p className={styles.error}>{pdfError}</p>}
           {pdfFile && !pdfError && <p className={styles.pdfSelected}>PDF file selected.</p>}
           <div className={styles.buttonGroup}>
