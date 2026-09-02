@@ -50,6 +50,27 @@ export default function Home() {
     setSubmitted(false);
   }
 
+  function handleModeChange(newMode: "text" | "pdf" | "context") {
+    setText("");
+    setExplanations([]);
+    setError(null);
+    setSubmitted(false);
+
+    setPdfFile(null);
+    setPdfError(null);
+    setPdfSummary(null);
+    setPdfExplanations([]);
+
+    setContextText("");
+    setContextDescription("");
+    setContextExplanations([]);
+    setContextSummary(null);
+    setContextError(null);
+    setContextSubmitted(false);
+
+    setMode(newMode);
+  }
+
   function handlePdfChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     setPdfFile(null);
@@ -217,13 +238,13 @@ export default function Home() {
       </h1>
 
       <div className={styles.modeToggle}>
-        <button type="button" className={styles.modeButton} onClick={() => setMode("text")} disabled={mode === "text"}>
+        <button type="button" className={styles.modeButton} onClick={() => handleModeChange("text")} disabled={mode === "text"}>
           Paste text
         </button>
-        <button type="button" className={styles.modeButton} onClick={() => setMode("context")} disabled={mode === "context"}>
+        <button type="button" className={styles.modeButton} onClick={() => handleModeChange("context")} disabled={mode === "context"}>
           Paste with context
         </button>
-        <button type="button" className={styles.modeButton} onClick={() => setMode("pdf")} disabled={mode === "pdf"}>
+        <button type="button" className={styles.modeButton} onClick={() => handleModeChange("pdf")} disabled={mode === "pdf"}>
           Upload PDF
         </button>
       </div>
