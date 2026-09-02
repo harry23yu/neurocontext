@@ -14,7 +14,11 @@ type Summary = {
   keyPoints: string[];
 };
 
-const MAX_PDF_SIZE_BYTES = 1 * 1024 * 1024; // 1 MB
+const MAX_PDF_WORD_COUNT = 1000;
+
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+}
 
 export default function Home() {
   const [mode, setMode] = useState<"text" | "pdf">("text");
@@ -51,12 +55,6 @@ export default function Home() {
       return;
     }
 
-    if (file.size > MAX_PDF_SIZE_BYTES) {
-      setPdfError("PDF must be 1 MB or smaller.");
-      e.target.value = "";
-      return;
-    }
-
     setPdfFile(file);
     setPdfSummary(null);
     setPdfExplanations([]);
@@ -80,6 +78,11 @@ export default function Home() {
 
       if (!pdfRes.ok) {
         throw new Error(pdfData.error || "Something went wrong");
+      }
+
+      const wordCount = countWords(pdfData.text);
+      if (wordCount > MAX_PDF_WORD_COUNT) {
+        throw new Error(`PDF exceeds 1,000 word limit (${wordCount} words).`);
       }
 
       const summarizeRes = await fetch("/api/summarize", {
@@ -198,7 +201,7 @@ export default function Home() {
             </label>
             <span>{pdfFile?.name || "No file chosen"}</span>
           </div>
-          <div className={styles.sizeHint}>Max size: 1 MB</div>
+          <div className={styles.sizeHint}>Max: 1,000 words</div>
           {pdfError && <p className={styles.error}>{pdfError}</p>}
           {pdfFile && !pdfError && <p className={styles.pdfSelected}>PDF file selected.</p>}
           <div className={styles.buttonGroup}>
