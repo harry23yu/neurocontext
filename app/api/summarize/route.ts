@@ -12,17 +12,22 @@ Given a passage, respond ONLY with JSON matching this shape, no other text:
 }`;
 
 export async function POST(request: Request) {
-  const { text } = await request.json();
+  const { text, context } = await request.json();
 
   if (typeof text !== "string" || !text.trim()) {
     return Response.json({ error: "Missing or empty 'text' field" }, { status: 400 });
+  }
+
+  let userMessage = text;
+  if (context && typeof context === "string" && context.trim()) {
+    userMessage = `Text source: ${context}\n\n${text}`;
   }
 
   const response = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 2000,
     system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: text }],
+    messages: [{ role: "user", content: userMessage }],
   });
 
   const block = response.content.find((b) => b.type === "text");

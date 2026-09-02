@@ -335,6 +335,29 @@
   margin-bottom: 1.5rem;
 }
 
+.contextInput {
+  width: 100%;
+  background: #14171f;
+  border: 1px solid #2a2f3d;
+  border-radius: 10px;
+  color: #e8e9ed;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  transition: border-color 0.15s ease;
+}
+
+.contextInput::placeholder {
+  color: #4b5163;
+}
+
+.contextInput:focus-visible {
+  outline: none;
+  border-color: #4dd0c4;
+  box-shadow: 0 0 0 3px rgba(77, 208, 196, 0.15);
+}
+
 .sectionName {
   font-size: 1.5rem;
   padding-bottom: 1rem;

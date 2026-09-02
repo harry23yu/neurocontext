@@ -21,7 +21,7 @@ function countWords(text: string): number {
 }
 
 export default function Home() {
-  const [mode, setMode] = useState<"text" | "pdf">("text");
+  const [mode, setMode] = useState<"text" | "pdf" | "context">("text");
 
   const [text, setText] = useState("");
   const [explanations, setExplanations] = useState<Explanation[]>([]);
@@ -34,6 +34,14 @@ export default function Home() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfSummary, setPdfSummary] = useState<Summary | null>(null);
   const [pdfExplanations, setPdfExplanations] = useState<Explanation[]>([]);
+
+  const [contextText, setContextText] = useState("");
+  const [contextDescription, setContextDescription] = useState("");
+  const [contextExplanations, setContextExplanations] = useState<Explanation[]>([]);
+  const [contextSummary, setContextSummary] = useState<Summary | null>(null);
+  const [contextLoading, setContextLoading] = useState(false);
+  const [contextError, setContextError] = useState<string | null>(null);
+  const [contextSubmitted, setContextSubmitted] = useState(false);
 
   function handleClear() {
     setText("");
@@ -145,6 +153,53 @@ export default function Home() {
     }
   }
 
+  async function handleContextSubmit(e: React.SubmitEvent) {
+    e.preventDefault();
+    setContextLoading(true);
+    setContextError(null);
+    setContextSummary(null);
+    setContextExplanations([]);
+    setContextSubmitted(false);
+
+    try {
+      const wordCount = countWords(contextText);
+      if (wordCount < 100 || wordCount > 1000) {
+        throw new Error(`Text must be between 100 and 1,000 words (${wordCount} words).`);
+      }
+
+      const summarizeRes = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: contextText, context: contextDescription }),
+      });
+      const summarizeData = await summarizeRes.json();
+
+      if (!summarizeRes.ok) {
+        throw new Error(summarizeData.error || "Something went wrong");
+      }
+
+      setContextSummary(summarizeData);
+
+      const explainRes = await fetch("/api/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: contextText, context: contextDescription }),
+      });
+      const explainData = await explainRes.json();
+
+      if (!explainRes.ok) {
+        throw new Error(explainData.error || "Something went wrong");
+      }
+
+      setContextExplanations(explainData.explanations);
+      setContextSubmitted(true);
+    } catch (err) {
+      setContextError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setContextLoading(false);
+    }
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -164,6 +219,9 @@ export default function Home() {
       <div className={styles.modeToggle}>
         <button type="button" className={styles.modeButton} onClick={() => setMode("text")} disabled={mode === "text"}>
           Paste text
+        </button>
+        <button type="button" className={styles.modeButton} onClick={() => setMode("context")} disabled={mode === "context"}>
+          Paste with context
         </button>
         <button type="button" className={styles.modeButton} onClick={() => setMode("pdf")} disabled={mode === "pdf"}>
           Upload PDF
@@ -187,6 +245,31 @@ export default function Home() {
             </button>
             <button type="button" className={`${styles.button} ${styles.clearButton}`} onClick={handleClear} disabled={loading}>
               Clear
+            </button>
+          </div>
+        </form>
+      )}
+
+      {mode === "context" && (
+        <form onSubmit={handleContextSubmit} className={styles.formSection}>
+          <textarea
+            className={styles.textarea}
+            value={contextText}
+            onChange={(e) => setContextText(e.target.value)}
+            rows={8}
+            placeholder="Paste text (100-1,000 words)..."
+          />
+          <div className={styles.charCount}>{countWords(contextText)} words</div>
+          <input
+            type="text"
+            className={styles.contextInput}
+            value={contextDescription}
+            onChange={(e) => setContextDescription(e.target.value)}
+            placeholder="Where is this from? (e.g., article, cover letter, email)"
+          />
+          <div className={styles.buttonGroup}>
+            <button type="submit" className={`${styles.button} ${styles.submitButton}`} disabled={contextLoading || !contextText.trim()}>
+              Analyze
             </button>
           </div>
         </form>
@@ -250,6 +333,47 @@ export default function Home() {
           </ul>
         </div>
       )}
+
+      {contextLoading && (
+        <div
+          role="status"
+          aria-label="Loading"
+          className={`${styles.spinner} animate-spin`}
+        />
+      )}
+
+      {contextSummary && (
+        <div className={styles.resultsSection}>
+          <h2 className={styles.sectionName}>Summary</h2>
+          <p>{contextSummary.summary}</p>
+          <br></br>
+          <h2 className={styles.sectionName}>Key Points</h2>
+          <ul className={styles.keyPoints}>
+            {contextSummary.keyPoints.map((point, i) => (
+              <li key={i}>{point}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {contextSummary && contextExplanations.length === 0 && !contextLoading && <p className={styles.noImplicit}>No implicit language found.</p>}
+
+      {contextExplanations.length > 0 && (
+        <div className={styles.resultsSection}>
+          <h3 className={styles.sectionName}>Implicit Language in the Text</h3>
+          <ul className={styles.resultsList}>
+            {contextExplanations.map((item, i) => (
+              <li key={i} className={styles.resultsItem}>
+                <span className={styles.phrase}>{item.phrase}</span>
+                <span className={styles.type}>{item.type}</span>
+                <p className={styles.explanation}>{item.explanation}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {contextError && <p className={styles.error}>{contextError}</p>}
 
       {loading && (
         <div
