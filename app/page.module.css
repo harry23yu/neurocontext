@@ -48,10 +48,8 @@
 }
 
 .modeButton:disabled {
-  background: #4dd0c4;
-  color: #14171f;
-  cursor: default;
-  font-weight: 600;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .modeButton:focus-visible {

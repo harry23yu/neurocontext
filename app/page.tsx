@@ -51,6 +51,8 @@ export default function Home() {
   }
 
   function handleModeChange(newMode: "text" | "pdf" | "context") {
+    if (mode === newMode) return;
+
     setText("");
     setExplanations([]);
     setError(null);
@@ -238,13 +240,13 @@ export default function Home() {
       </h1>
 
       <div className={styles.modeToggle}>
-        <button type="button" className={styles.modeButton} onClick={() => handleModeChange("text")} disabled={mode === "text"}>
+        <button type="button" className={styles.modeButton} onClick={() => handleModeChange("text")} disabled={loading || contextLoading || pdfLoading} style={mode === "text" ? { background: "#4dd0c4", color: "#14171f", fontWeight: "600" } : {}}>
           Paste text
         </button>
-        <button type="button" className={styles.modeButton} onClick={() => handleModeChange("context")} disabled={mode === "context"}>
+        <button type="button" className={styles.modeButton} onClick={() => handleModeChange("context")} disabled={loading || contextLoading || pdfLoading} style={mode === "context" ? { background: "#4dd0c4", color: "#14171f", fontWeight: "600" } : {}}>
           Paste with context
         </button>
-        <button type="button" className={styles.modeButton} onClick={() => handleModeChange("pdf")} disabled={mode === "pdf"}>
+        <button type="button" className={styles.modeButton} onClick={() => handleModeChange("pdf")} disabled={loading || contextLoading || pdfLoading} style={mode === "pdf" ? { background: "#4dd0c4", color: "#14171f", fontWeight: "600" } : {}}>
           Upload PDF
         </button>
       </div>
