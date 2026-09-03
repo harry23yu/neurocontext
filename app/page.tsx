@@ -51,6 +51,15 @@ export default function Home() {
     setSubmitted(false);
   }
 
+  function handleContextClear() {
+    setContextText("");
+    setContextDescription("");
+    setContextExplanations([]);
+    setContextError(null);
+    setContextSummary(null);
+    setContextSubmitted(false);
+  }
+
   function handleModeChange(newMode: "text" | "pdf" | "context") {
     if (mode === newMode) return;
 
@@ -300,6 +309,9 @@ export default function Home() {
           <div className={styles.buttonGroup}>
             <button type="submit" className={`${styles.button} ${styles.submitButton}`} disabled={contextLoading || !contextText.trim()}>
               Analyze
+            </button>
+            <button type="button" className={`${styles.button} ${styles.clearButton}`} onClick={handleContextClear} disabled={contextLoading}>
+              Clear
             </button>
           </div>
         </form>
