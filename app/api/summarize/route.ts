@@ -4,7 +4,7 @@ const client = new Anthropic();
 
 const SYSTEM_PROMPT = `You help neurodivergent readers (autistic and ADHD folks) get an accessible overview of a longer passage before reading it in full.
 
-Given a passage, respond ONLY with JSON matching this shape, no other text:
+Given a passage, respond ONLY with JSON matching this shape, no other text. Do not use Markdown formatting in your response:
 
 {
   "summary": "a short, plain-language summary of the passage (2-4 sentences)",
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
   let userMessage = text;
   if (context && typeof context === "string" && context.trim()) {
-    userMessage = `Text source: ${context}\n\n${text}`;
+    userMessage = `This text is from: ${context}\n\nUse this context to better understand the text and reference the source when relevant in your summary and key points.\n\n${text}`;
   }
 
   const response = await client.messages.create({
