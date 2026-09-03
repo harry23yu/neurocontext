@@ -262,7 +262,8 @@
   text-decoration-color: #3aa89e;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
-  white-space: nowrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .type {
