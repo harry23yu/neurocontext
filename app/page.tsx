@@ -310,7 +310,7 @@ export default function Home() {
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             <label className={styles.fileLabel}>
               Choose File
-              <input type="file" className={styles.fileInput} accept="application/pdf" onChange={handlePdfChange} />
+              <input type="file" className={styles.fileInput} accept="application/pdf" onChange={handlePdfChange} disabled={pdfLoading} />
             </label>
             <span>{pdfFile?.name || "No file chosen"}</span>
           </div>
