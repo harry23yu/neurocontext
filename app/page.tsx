@@ -255,6 +255,10 @@ export default function Home() {
         <span className={styles.titleClear}>vs. what they said.</span>
       </h1>
 
+      <p className={styles.subtitle}>
+        Paste a sentence, a chunk of text, or upload a PDF, and NeuroContext will identify implicit language like idioms, sarcasm, and social cues, then explain each one in plain, literal terms.
+      </p>
+
       <div className={styles.modeToggle}>
         <button type="button" className={styles.modeButton} onClick={() => handleModeChange("text")} disabled={loading || contextLoading || pdfLoading} style={mode === "text" ? { background: "#4dd0c4", color: "#14171f", fontWeight: "600" } : {}}>
           Paste text

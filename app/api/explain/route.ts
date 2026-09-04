@@ -28,11 +28,11 @@ Given a passage, find every instance of implicit language and explain it in clea
 
 {
   "explanations": [
-    { "phrase": "the exact phrase from the text", "type": "idiom" | "slang" | "sarcasm" | "figurative" | "social_cue", "explanation": "plain, literal explanation of what it actually means" }
+    { "phrase": "the exact phrase from the text", "type": "idiom" | "slang" | "sarcasm" | "figurative" | "social cue", "explanation": "plain, literal explanation of what it actually means" }
   ]
 }
 
-CRITICAL: Only use these exact type values: "idiom", "slang", "sarcasm", "figurative", or "social_cue". Never create other types. If something doesn't fit these categories or is just technical jargon used literally, do NOT flag it.
+CRITICAL: Only use these exact type values: "idiom", "slang", "sarcasm", "figurative", or "social cue". Never create other types. If something doesn't fit these categories or is just technical jargon used literally, do NOT flag it.
 
 If there is no implicit language in the text, return { "explanations": [] }.`;
 

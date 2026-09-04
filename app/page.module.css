@@ -415,3 +415,10 @@
   text-underline-offset: 6px;
   text-decoration-color: rgba(77, 208, 196, 0.5);
 }
+
+.subtitle {
+  font-size: 16px;
+  color: #8b8fa3;
+  margin: 0;
+  margin-bottom: 1rem;
+}
