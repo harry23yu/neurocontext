@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local test scratch files
-test_phrases.txt
+# miscellaneous files
+/miscellaneous

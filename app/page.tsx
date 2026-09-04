@@ -14,7 +14,7 @@ type Summary = {
   keyPoints: string[];
 };
 
-const MAX_PDF_WORD_COUNT = 1000;
+const MAX_PDF_CHAR_COUNT = 5000;
 const MAX_PDF_SIZE_BYTES = 1 * 102400;
 
 function countWords(text: string): number {
@@ -127,9 +127,8 @@ export default function Home() {
         throw new Error(pdfData.error || "Something went wrong");
       }
 
-      const wordCount = countWords(pdfData.text);
-      if (wordCount > MAX_PDF_WORD_COUNT) {
-        throw new Error(`PDF exceeds 1,000 word limit (${wordCount} words).`);
+      if (pdfData.text.length > MAX_PDF_CHAR_COUNT) {
+        throw new Error(`PDF exceeds 5,000 character limit (${pdfData.text.length} characters).`);
       }
 
       const summarizeRes = await fetch("/api/summarize", {
@@ -201,9 +200,8 @@ export default function Home() {
     setContextSubmitted(false);
 
     try {
-      const wordCount = countWords(contextText);
-      if (wordCount < 100 || wordCount > 1000) {
-        throw new Error(`Text must be between 100 and 1,000 words (${wordCount} words).`);
+      if (contextText.length < 501 || contextText.length > 5000) {
+        throw new Error(`Text must be between 501 and 5,000 characters (${contextText.length} characters).`);
       }
 
       const summarizeRes = await fetch("/api/summarize", {
@@ -300,9 +298,10 @@ export default function Home() {
             value={contextText}
             onChange={(e) => setContextText(e.target.value)}
             rows={8}
-            placeholder="Paste text (100-1,000 words)..."
+            maxLength={5000}
+            placeholder="Paste text (501-5,000 characters)..."
           />
-          <div className={styles.charCount}>{countWords(contextText)} words</div>
+          <div className={styles.charCount}>{contextText.length}/5,000 characters</div>
           <input
             type="text"
             className={styles.contextInput}
@@ -330,7 +329,7 @@ export default function Home() {
             </label>
             <span>{pdfFile?.name || "No file chosen"}</span>
           </div>
-          <div className={styles.sizeHint}>PDF can't exceed 1,000 words or 100 KB.</div>
+          <div className={styles.sizeHint}>PDF can't exceed 5,000 characters or 100 KB.</div>
           {pdfError && <p className={styles.error}>{pdfError}</p>}
           {pdfFile && !pdfError && <p className={styles.pdfSelected}>PDF file selected.</p>}
           <div className={styles.buttonGroup}>
