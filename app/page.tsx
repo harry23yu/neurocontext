@@ -278,10 +278,10 @@ export default function Home() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={8}
-            maxLength={200}
+            maxLength={500}
             placeholder="Paste text containing idioms, sarcasm, or social cues..."
           />
-          <div className={styles.charCount}>{text.length}/200 characters</div>
+          <div className={styles.charCount}>{text.length}/500 characters</div>
           <div className={styles.buttonGroup}>
             <button type="submit" className={`${styles.button} ${styles.submitButton}`} disabled={loading || !text.trim()}>
               Explain
