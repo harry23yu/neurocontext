@@ -8,6 +8,13 @@
       "when": 1788569708127,
       "tag": "0000_majestic_hiroim",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788576450966,
+      "tag": "0001_grey_shatterstar",
+      "breakpoints": true
     }
   ]
 }
