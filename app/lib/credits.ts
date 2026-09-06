@@ -86,3 +86,28 @@ export async function checkAndConsumeCredit({
   if (!row) throw new CreditsExhaustedError();
   return row.used;
 }
+
+const ANON_WEEKLY_LIMIT = 10;
+
+export async function reconcileAnonymousUsageOnLogin(userId: string): Promise<void> {
+  const cookieStore = await cookies();
+  const anonId = cookieStore.get(ANON_ID_COOKIE)?.value;
+  if (!anonId) return;
+
+  const weekStart = getWeekStart(new Date());
+
+  const anonRows = await db.execute<{ used: number }>(sql`
+    SELECT used FROM credit_usage
+    WHERE owner_type = 'anon' AND owner_id = ${anonId} AND week_start = ${weekStart}
+  `);
+
+  const anonUsed = Math.min(anonRows[0]?.used ?? 0, ANON_WEEKLY_LIMIT);
+  if (anonUsed <= 0) return;
+
+  await db.execute(sql`
+    INSERT INTO credit_usage (owner_type, owner_id, week_start, used)
+    VALUES ('user', ${userId}, ${weekStart}, ${anonUsed})
+    ON CONFLICT (owner_type, owner_id, week_start)
+    DO UPDATE SET used = GREATEST(credit_usage.used, ${anonUsed}), updated_at = now()
+  `);
+}

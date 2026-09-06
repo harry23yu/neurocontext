@@ -9,6 +9,7 @@ import { db } from "@/app/lib/db";
 import { users, verificationCodes, deletedEmailTombstones } from "@/app/lib/db/schema";
 import { SignupSchema } from "@/app/lib/definitions";
 import { createSession, deleteSession } from "@/app/lib/session";
+import { reconcileAnonymousUsageOnLogin } from "@/app/lib/credits";
 
 const VERIFICATION_CODE_TTL_MS = 15 * 60 * 1000;
 const MAX_VERIFICATION_ATTEMPTS = 5;
@@ -204,6 +205,7 @@ export async function login(
     return { error: "Invalid email or password." };
   }
 
+  await reconcileAnonymousUsageOnLogin(user.id);
   await createSession(user.id);
   redirect("/");
 }
