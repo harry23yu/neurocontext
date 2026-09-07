@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { requireCredit, CreditsExhaustedError } from "@/app/lib/credits";
 
 const client = new Anthropic();
 
@@ -37,10 +38,27 @@ CRITICAL: Only use these exact type values: "idiom", "slang", "sarcasm", "figura
 If there is no implicit language in the text, return { "explanations": [] }.`;
 
 export async function POST(request: Request) {
-  const { text, context } = await request.json();
+  const { text, context, mode } = await request.json();
 
   if (typeof text !== "string" || !text.trim()) {
     return Response.json({ error: "Missing or empty 'text' field" }, { status: 400 });
+  }
+
+  const cost = mode === "context" || mode === "pdf" ? 0 : 1;
+  try {
+    await requireCredit(cost);
+  } catch (e) {
+    if (e instanceof CreditsExhaustedError) {
+      return Response.json(
+        {
+          error: "You've used all your credits this week. Come back after Monday.",
+          code: "OUT_OF_CREDITS",
+          anonymous: e.anonymous,
+        },
+        { status: 429 },
+      );
+    }
+    throw e;
   }
 
   let userMessage = text;

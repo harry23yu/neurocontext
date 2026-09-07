@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { sql } from "drizzle-orm";
 import { db } from "./db";
+import { verifySession } from "./dal";
 
 const ANON_ID_COOKIE = "nc_anon_id";
 const ANON_ID_MAX_AGE = 60 * 60 * 24 * 365;
@@ -54,9 +55,12 @@ export function getWeekStart(date: Date): string {
 }
 
 export class CreditsExhaustedError extends Error {
-  constructor() {
+  anonymous: boolean;
+
+  constructor(anonymous: boolean) {
     super("Credits exhausted for this week");
     this.name = "CreditsExhaustedError";
+    this.anonymous = anonymous;
   }
 }
 
@@ -83,11 +87,35 @@ export async function checkAndConsumeCredit({
   `);
 
   const row = rows[0];
-  if (!row) throw new CreditsExhaustedError();
+  if (!row) throw new CreditsExhaustedError(ownerType === "anon");
   return row.used;
 }
 
 const ANON_WEEKLY_LIMIT = 10;
+const SIGNED_IN_WEEKLY_LIMIT = 20;
+
+export async function requireCredit(cost: number): Promise<void> {
+  if (cost <= 0) return;
+
+  const session = await verifySession();
+  if (session) {
+    await checkAndConsumeCredit({
+      ownerType: "user",
+      ownerId: session.userId,
+      cost,
+      limit: SIGNED_IN_WEEKLY_LIMIT,
+    });
+    return;
+  }
+
+  const anonId = await getOrCreateAnonId();
+  await checkAndConsumeCredit({
+    ownerType: "anon",
+    ownerId: anonId,
+    cost,
+    limit: ANON_WEEKLY_LIMIT,
+  });
+}
 
 export async function reconcileAnonymousUsageOnLogin(userId: string): Promise<void> {
   const cookieStore = await cookies();

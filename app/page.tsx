@@ -21,6 +21,17 @@ function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(word => word.length > 0).length;
 }
 
+class ApiError extends Error {
+  code?: string;
+  anonymous?: boolean;
+
+  constructor(message: string, code?: string, anonymous?: boolean) {
+    super(message);
+    this.code = code;
+    this.anonymous = anonymous;
+  }
+}
+
 export default function Home() {
   const [mode, setMode] = useState<"text" | "pdf" | "context">("text");
 
@@ -28,10 +39,12 @@ export default function Home() {
   const [explanations, setExplanations] = useState<Explanation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [outOfCreditsAnonymous, setOutOfCreditsAnonymous] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfError, setPdfError] = useState<string | null>(null);
+  const [pdfOutOfCreditsAnonymous, setPdfOutOfCreditsAnonymous] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfSummary, setPdfSummary] = useState<Summary | null>(null);
   const [pdfExplanations, setPdfExplanations] = useState<Explanation[]>([]);
@@ -42,12 +55,14 @@ export default function Home() {
   const [contextSummary, setContextSummary] = useState<Summary | null>(null);
   const [contextLoading, setContextLoading] = useState(false);
   const [contextError, setContextError] = useState<string | null>(null);
+  const [contextOutOfCreditsAnonymous, setContextOutOfCreditsAnonymous] = useState(false);
   const [contextSubmitted, setContextSubmitted] = useState(false);
 
   function handleClear() {
     setText("");
     setExplanations([]);
     setError(null);
+    setOutOfCreditsAnonymous(false);
     setSubmitted(false);
   }
 
@@ -56,6 +71,7 @@ export default function Home() {
     setContextDescription("");
     setContextExplanations([]);
     setContextError(null);
+    setContextOutOfCreditsAnonymous(false);
     setContextSummary(null);
     setContextSubmitted(false);
   }
@@ -66,10 +82,12 @@ export default function Home() {
     setText("");
     setExplanations([]);
     setError(null);
+    setOutOfCreditsAnonymous(false);
     setSubmitted(false);
 
     setPdfFile(null);
     setPdfError(null);
+    setPdfOutOfCreditsAnonymous(false);
     setPdfSummary(null);
     setPdfExplanations([]);
 
@@ -78,6 +96,7 @@ export default function Home() {
     setContextExplanations([]);
     setContextSummary(null);
     setContextError(null);
+    setContextOutOfCreditsAnonymous(false);
     setContextSubmitted(false);
 
     setMode(newMode);
@@ -113,6 +132,7 @@ export default function Home() {
 
     setPdfLoading(true);
     setPdfError(null);
+    setPdfOutOfCreditsAnonymous(false);
     setPdfSummary(null);
     setPdfExplanations([]);
 
@@ -134,12 +154,12 @@ export default function Home() {
       const summarizeRes = await fetch("/api/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: pdfData.text }),
+        body: JSON.stringify({ text: pdfData.text, mode: "pdf" }),
       });
       const summarizeData = await summarizeRes.json();
 
       if (!summarizeRes.ok) {
-        throw new Error(summarizeData.error || "Something went wrong");
+        throw new ApiError(summarizeData.error || "Something went wrong", summarizeData.code, summarizeData.anonymous);
       }
 
       setPdfSummary(summarizeData);
@@ -147,17 +167,18 @@ export default function Home() {
       const explainRes = await fetch("/api/explain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: pdfData.text }),
+        body: JSON.stringify({ text: pdfData.text, mode: "pdf" }),
       });
       const explainData = await explainRes.json();
 
       if (!explainRes.ok) {
-        throw new Error(explainData.error || "Something went wrong");
+        throw new ApiError(explainData.error || "Something went wrong", explainData.code, explainData.anonymous);
       }
 
       setPdfExplanations(explainData.explanations);
     } catch (err) {
       setPdfError(err instanceof Error ? err.message : "Something went wrong");
+      setPdfOutOfCreditsAnonymous(err instanceof ApiError && err.code === "OUT_OF_CREDITS" && !!err.anonymous);
     } finally {
       setPdfLoading(false);
     }
@@ -167,6 +188,7 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setOutOfCreditsAnonymous(false);
     setExplanations([]);
     setSubmitted(false);
 
@@ -174,18 +196,19 @@ export default function Home() {
       const res = await fetch("/api/explain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, mode: "text" }),
       });
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Something went wrong");
+        throw new ApiError(data.error || "Something went wrong", data.code, data.anonymous);
       }
 
       setExplanations(data.explanations);
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
+      setOutOfCreditsAnonymous(err instanceof ApiError && err.code === "OUT_OF_CREDITS" && !!err.anonymous);
     } finally {
       setLoading(false);
     }
@@ -195,6 +218,7 @@ export default function Home() {
     e.preventDefault();
     setContextLoading(true);
     setContextError(null);
+    setContextOutOfCreditsAnonymous(false);
     setContextSummary(null);
     setContextExplanations([]);
     setContextSubmitted(false);
@@ -207,12 +231,12 @@ export default function Home() {
       const summarizeRes = await fetch("/api/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: contextText, context: contextDescription }),
+        body: JSON.stringify({ text: contextText, context: contextDescription, mode: "context" }),
       });
       const summarizeData = await summarizeRes.json();
 
       if (!summarizeRes.ok) {
-        throw new Error(summarizeData.error || "Something went wrong");
+        throw new ApiError(summarizeData.error || "Something went wrong", summarizeData.code, summarizeData.anonymous);
       }
 
       setContextSummary(summarizeData);
@@ -220,18 +244,19 @@ export default function Home() {
       const explainRes = await fetch("/api/explain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: contextText, context: contextDescription }),
+        body: JSON.stringify({ text: contextText, context: contextDescription, mode: "context" }),
       });
       const explainData = await explainRes.json();
 
       if (!explainRes.ok) {
-        throw new Error(explainData.error || "Something went wrong");
+        throw new ApiError(explainData.error || "Something went wrong", explainData.code, explainData.anonymous);
       }
 
       setContextExplanations(explainData.explanations);
       setContextSubmitted(true);
     } catch (err) {
       setContextError(err instanceof Error ? err.message : "Something went wrong");
+      setContextOutOfCreditsAnonymous(err instanceof ApiError && err.code === "OUT_OF_CREDITS" && !!err.anonymous);
     } finally {
       setContextLoading(false);
     }
@@ -330,7 +355,20 @@ export default function Home() {
             <span>{pdfFile?.name || "No file chosen"}</span>
           </div>
           <div className={styles.sizeHint}>PDF can't exceed 5,000 characters or 100 KB.</div>
-          {pdfError && <p className={styles.error}>{pdfError}</p>}
+          {pdfError && (
+            <p className={styles.error}>
+              {pdfError}
+              {pdfOutOfCreditsAnonymous && (
+                <>
+                  {" "}
+                  <a href="/signup" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>
+                    Sign up
+                  </a>{" "}
+                  for more credits.
+                </>
+              )}
+            </p>
+          )}
           {pdfFile && !pdfError && <p className={styles.pdfSelected}>PDF file selected.</p>}
           <div className={styles.buttonGroup}>
             <button type="submit" className={`${styles.button} ${styles.submitButton}`} disabled={pdfLoading || !pdfFile || !!pdfError}>
@@ -418,7 +456,20 @@ export default function Home() {
         </div>
       )}
 
-      {contextError && <p className={styles.error}>{contextError}</p>}
+      {contextError && (
+        <p className={styles.error}>
+          {contextError}
+          {contextOutOfCreditsAnonymous && (
+            <>
+              {" "}
+              <a href="/signup" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>
+                Sign up
+              </a>{" "}
+              for more credits.
+            </>
+          )}
+        </p>
+      )}
 
       {loading && (
         <div
@@ -428,7 +479,20 @@ export default function Home() {
         />
       )}
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <p className={styles.error}>
+          {error}
+          {outOfCreditsAnonymous && (
+            <>
+              {" "}
+              <a href="/signup" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>
+                Sign up
+              </a>{" "}
+              for more credits.
+            </>
+          )}
+        </p>
+      )}
 
       {submitted && explanations.length === 0 && <p className={styles.noImplicit}>No implicit language found.</p>}
 

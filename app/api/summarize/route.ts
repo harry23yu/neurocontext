@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { requireCredit, CreditsExhaustedError } from "@/app/lib/credits";
 
 const client = new Anthropic();
 
@@ -16,6 +17,22 @@ export async function POST(request: Request) {
 
   if (typeof text !== "string" || !text.trim()) {
     return Response.json({ error: "Missing or empty 'text' field" }, { status: 400 });
+  }
+
+  try {
+    await requireCredit(3);
+  } catch (e) {
+    if (e instanceof CreditsExhaustedError) {
+      return Response.json(
+        {
+          error: "You've used all your credits this week. Come back after Monday.",
+          code: "OUT_OF_CREDITS",
+          anonymous: e.anonymous,
+        },
+        { status: 429 },
+      );
+    }
+    throw e;
   }
 
   let userMessage = text;
