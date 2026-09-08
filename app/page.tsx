@@ -21,6 +21,20 @@ function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(word => word.length > 0).length;
 }
 
+function saveHistory(payload: {
+  mode: "text" | "context" | "pdf";
+  inputText: string;
+  inputContext?: string;
+  resultSummary?: Summary;
+  resultExplanations: Explanation[];
+}) {
+  fetch("/api/history", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }).catch(() => {});
+}
+
 class ApiError extends Error {
   code?: string;
   anonymous?: boolean;
@@ -176,6 +190,12 @@ export default function Home() {
       }
 
       setPdfExplanations(explainData.explanations);
+      saveHistory({
+        mode: "pdf",
+        inputText: pdfData.text,
+        resultSummary: summarizeData,
+        resultExplanations: explainData.explanations,
+      });
     } catch (err) {
       setPdfError(err instanceof Error ? err.message : "Something went wrong");
       setPdfOutOfCreditsAnonymous(err instanceof ApiError && err.code === "OUT_OF_CREDITS" && !!err.anonymous);
@@ -206,6 +226,11 @@ export default function Home() {
 
       setExplanations(data.explanations);
       setSubmitted(true);
+      saveHistory({
+        mode: "text",
+        inputText: text,
+        resultExplanations: data.explanations,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setOutOfCreditsAnonymous(err instanceof ApiError && err.code === "OUT_OF_CREDITS" && !!err.anonymous);
@@ -254,6 +279,13 @@ export default function Home() {
 
       setContextExplanations(explainData.explanations);
       setContextSubmitted(true);
+      saveHistory({
+        mode: "context",
+        inputText: contextText,
+        inputContext: contextDescription,
+        resultSummary: summarizeData,
+        resultExplanations: explainData.explanations,
+      });
     } catch (err) {
       setContextError(err instanceof Error ? err.message : "Something went wrong");
       setContextOutOfCreditsAnonymous(err instanceof ApiError && err.code === "OUT_OF_CREDITS" && !!err.anonymous);
