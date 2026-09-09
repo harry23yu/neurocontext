@@ -29,6 +29,9 @@ export default async function Header() {
             <Link href="/history" style={{ color: "var(--color-text)", textDecoration: "none" }}>
               History
             </Link>
+            <Link href="/account" style={{ color: "var(--color-text)", textDecoration: "none" }}>
+              Account
+            </Link>
             <form action={logout}>
               <button
                 type="submit"
