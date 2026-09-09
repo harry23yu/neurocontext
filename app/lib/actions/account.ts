@@ -1,10 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { db } from "@/app/lib/db";
-import { users, deletedEmailTombstones } from "@/app/lib/db/schema";
+import { users, deletedEmailTombstones, creditUsage } from "@/app/lib/db/schema";
 import { verifySession } from "@/app/lib/dal";
 import { deleteSession } from "@/app/lib/session";
 
@@ -42,6 +42,9 @@ export async function deleteAccount(
     .insert(deletedEmailTombstones)
     .values({ email: user.email })
     .onConflictDoNothing();
+  await db
+    .delete(creditUsage)
+    .where(and(eq(creditUsage.ownerType, "user"), eq(creditUsage.ownerId, user.id)));
   await db.delete(users).where(eq(users.id, user.id));
   await deleteSession();
 
