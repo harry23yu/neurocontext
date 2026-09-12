@@ -296,9 +296,6 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1>NeuroContext</h1>
-      </div>
 
       <div className={styles.slogan}>
         <span className={styles.dot}/>
@@ -404,7 +401,7 @@ export default function Home() {
           {pdfFile && !pdfError && <p className={styles.pdfSelected}>PDF file selected.</p>}
           <div className={styles.buttonGroup}>
             <button type="submit" className={`${styles.button} ${styles.submitButton}`} disabled={pdfLoading || !pdfFile || !!pdfError}>
-              Extract text
+              Analyze
             </button>
           </div>
         </form>
