@@ -91,7 +91,7 @@ export default async function HistoryPage() {
                     fontSize: 14,
                   }}
                 >
-                  Timestamp
+                  Timestamp (Pacific Time)
                 </th>
               </tr>
             </thead>

@@ -308,7 +308,7 @@ export default function Home() {
       </h1>
 
       <p className={styles.subtitle}>
-        Paste a sentence, a chunk of text, or upload a PDF, and NeuroContext will identify implicit language like idioms, sarcasm, and social cues, then explain each one in plain, literal terms.
+        Paste a phrase or sentence, a chunk of text, or upload a PDF, and NeuroContext will identify implicit language like idioms, sarcasm, and social cues, then explain each one in plain, literal terms.
       </p>
 
       <div className={styles.modeToggle}>
@@ -331,7 +331,7 @@ export default function Home() {
             onChange={(e) => setText(e.target.value)}
             rows={8}
             maxLength={500}
-            placeholder="Paste text containing idioms, sarcasm, or social cues..."
+            placeholder="Paste text containing idioms, sarcasm, or social cues (up to 500 characters)..."
           />
           <div className={styles.charCount}>{text.length}/500 characters</div>
           <div className={styles.buttonGroup}>
