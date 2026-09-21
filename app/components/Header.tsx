@@ -23,6 +23,9 @@ export default async function Header() {
       </Link>
 
       <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+        <Link href="/pricing" style={{ color: "var(--color-text)", textDecoration: "none" }}>
+          Pricing
+        </Link>
         {user ? (
           <>
             <span style={{ color: "var(--color-muted)", fontSize: 14 }}>{user.email}</span>
