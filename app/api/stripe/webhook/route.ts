@@ -17,17 +17,32 @@ async function upsertSubscriptionRow(sub: Stripe.Subscription, userId: string) {
   const plan = getPlanFromPriceId(item.price.id);
   if (!plan) return;
 
+  // Attaching a schedule (for a downgrade) also fires this event without the
+  // price actually changing yet. Only clear pendingPlan/stripeScheduleId once
+  // the schedule has actually advanced — i.e. the current price now matches
+  // what was pending. Otherwise preserve whatever is already scheduled.
+  const existingRow = await db.query.subscriptions.findFirst({
+    where: eq(subscriptions.userId, userId),
+  });
+  const scheduleAdvanced = existingRow?.pendingPlan === plan;
+  const pendingPlan = scheduleAdvanced ? null : existingRow?.pendingPlan ?? null;
+  const stripeScheduleId = scheduleAdvanced
+    ? null
+    : typeof sub.schedule === "string"
+      ? sub.schedule
+      : existingRow?.stripeScheduleId ?? null;
+
   await db
     .insert(subscriptions)
     .values({
       userId,
       stripeCustomerId: sub.customer as string,
       stripeSubscriptionId: sub.id,
-      stripeScheduleId: typeof sub.schedule === "string" ? sub.schedule : null,
+      stripeScheduleId,
       plan,
       status: sub.status,
       currentPeriodEnd: new Date(item.current_period_end * 1000),
-      pendingPlan: null,
+      pendingPlan,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
@@ -35,11 +50,11 @@ async function upsertSubscriptionRow(sub: Stripe.Subscription, userId: string) {
       set: {
         stripeCustomerId: sub.customer as string,
         stripeSubscriptionId: sub.id,
-        stripeScheduleId: typeof sub.schedule === "string" ? sub.schedule : null,
+        stripeScheduleId,
         plan,
         status: sub.status,
         currentPeriodEnd: new Date(item.current_period_end * 1000),
-        pendingPlan: null,
+        pendingPlan,
         updatedAt: new Date(),
       },
     });
