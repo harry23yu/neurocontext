@@ -6,11 +6,7 @@ import { db } from "@/app/lib/db";
 import { subscriptions } from "@/app/lib/db/schema";
 import { getUser } from "@/app/lib/dal";
 import { stripe } from "@/app/lib/stripe";
-
-const PRICE_IDS: Record<"silver" | "gold", string> = {
-  silver: process.env.STRIPE_SILVER_PRICE_ID!,
-  gold: process.env.STRIPE_GOLD_PRICE_ID!,
-};
+import { PAID_PLAN_PRICE_IDS } from "@/app/lib/plans";
 
 export async function startCheckout(formData: FormData): Promise<void> {
   const user = await getUser();
@@ -33,7 +29,7 @@ export async function startCheckout(formData: FormData): Promise<void> {
     mode: "subscription",
     customer_email: user.email,
     client_reference_id: user.id,
-    line_items: [{ price: PRICE_IDS[plan], quantity: 1 }],
+    line_items: [{ price: PAID_PLAN_PRICE_IDS[plan], quantity: 1 }],
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/account?checkout=success`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
   });
