@@ -2,7 +2,8 @@ import "server-only";
 import { cookies } from "next/headers";
 import { sql } from "drizzle-orm";
 import { db } from "./db";
-import { verifySession } from "./dal";
+import { getUser, verifySession } from "./dal";
+import { getPlanLimits } from "./plans";
 
 const ANON_ID_COOKIE = "nc_anon_id";
 const ANON_ID_MAX_AGE = 60 * 60 * 24 * 365;
@@ -92,18 +93,18 @@ export async function checkAndConsumeCredit({
 }
 
 const ANON_WEEKLY_LIMIT = 10;
-const SIGNED_IN_WEEKLY_LIMIT = 20;
 
 export async function requireCredit(cost: number): Promise<void> {
   if (cost <= 0) return;
 
-  const session = await verifySession();
-  if (session) {
+  const user = await getUser();
+  if (user) {
+    const planLimits = getPlanLimits(user.plan);
     await checkAndConsumeCredit({
       ownerType: "user",
-      ownerId: session.userId,
+      ownerId: user.id,
       cost,
-      limit: SIGNED_IN_WEEKLY_LIMIT,
+      limit: planLimits.creditLimit,
     });
     return;
   }
