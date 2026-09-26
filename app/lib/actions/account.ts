@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { db } from "@/app/lib/db";
-import { users, deletedEmailTombstones, creditUsage } from "@/app/lib/db/schema";
+import { users, deletedEmailTombstones, creditUsage, subscriptions } from "@/app/lib/db/schema";
+import { stripe } from "@/app/lib/stripe";
 import { verifySession } from "@/app/lib/dal";
 import { deleteSession } from "@/app/lib/session";
 
@@ -36,6 +37,16 @@ export async function deleteAccount(
   const matches = await bcrypt.compare(password, user.passwordHash);
   if (!matches) {
     return { error: "Incorrect password." };
+  }
+
+  const subscription = await db.query.subscriptions.findFirst({
+    where: eq(subscriptions.userId, user.id),
+  });
+
+  if (subscription) {
+    await stripe.subscriptions.cancel(subscription.stripeSubscriptionId, {
+      prorate: false,
+    });
   }
 
   await db
