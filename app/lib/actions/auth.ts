@@ -166,6 +166,7 @@ export async function verifyCode(
     .where(eq(users.id, user.id));
   await db.delete(verificationCodes).where(eq(verificationCodes.id, latestCode.id));
 
+  await reconcileAnonymousUsageOnLogin(user.id);
   await createSession(user.id);
   redirect("/");
 }
