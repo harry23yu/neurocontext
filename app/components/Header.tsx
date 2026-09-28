@@ -5,13 +5,14 @@ import { logout } from "@/app/lib/actions/auth";
 import { db } from "@/app/lib/db";
 import { creditUsage } from "@/app/lib/db/schema";
 import { getPlanLimits } from "@/app/lib/plans";
-import { getWeekStart } from "@/app/lib/credits";
+import { getWeekStart, getOrCreateAnonId } from "@/app/lib/credits";
 
 export default async function Header() {
   const user = await getUser();
+  const anonId = await getOrCreateAnonId();
 
-  let remaining = 0;
-  let limit = 20;
+  let remaining = 10;
+  let limit = 10;
 
   if (user) {
     const planLimits = getPlanLimits(user.plan);
@@ -28,6 +29,18 @@ export default async function Header() {
 
     const used = usage?.used || 0;
     remaining = Math.max(0, limit - used);
+  } else {
+    const weekStart = getWeekStart(new Date());
+    const usage = await db.query.creditUsage.findFirst({
+      where: and(
+        eq(creditUsage.ownerType, "anon"),
+        eq(creditUsage.ownerId, anonId),
+        eq(creditUsage.weekStart, weekStart),
+      ),
+    });
+
+    const used = usage?.used || 0;
+    remaining = Math.max(0, 10 - used);
   }
 
   return (
@@ -48,31 +61,29 @@ export default async function Header() {
       </Link>
 
       <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
-        {user && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: "150px", paddingTop: "5px"}}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: "150px", paddingTop: "5px"}}>
+          <div
+            style={{
+              display: "flex",
+              height: "6px",
+              background: "var(--color-border)",
+              borderRadius: "3px",
+              overflow: "hidden",
+            }}
+          >
             <div
               style={{
-                display: "flex",
-                height: "6px",
-                background: "var(--color-border)",
+                width: `${(remaining / limit) * 100}%`,
+                background: "var(--color-accent)",
                 borderRadius: "3px",
-                overflow: "hidden",
+                transition: "width 0.2s ease",
               }}
-            >
-              <div
-                style={{
-                  width: `${(remaining / limit) * 100}%`,
-                  background: "var(--color-accent)",
-                  borderRadius: "3px",
-                  transition: "width 0.2s ease",
-                }}
-              />
-            </div>
-            <span style={{ fontSize: "12px", color: "var(--color-muted)", textAlign: "center"}}>
-              {remaining} credits of {limit} remaining
-            </span>
+            />
           </div>
-        )}
+          <span style={{ fontSize: "12px", color: "var(--color-muted)", textAlign: "center"}}>
+            {remaining} credits of {limit} remaining
+          </span>
+        </div>
         <Link href="/pricing" style={{ color: "var(--color-text)", textDecoration: "none" }}>
           Pricing
         </Link>
