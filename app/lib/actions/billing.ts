@@ -62,9 +62,22 @@ export async function changePlan(formData: FormData): Promise<void> {
   const currentPlan = row.plan as Plan;
   if (newPlan === currentPlan) redirect("/account");
 
+  // Stripe rejects edits/new schedules on a subscription that's still attached to a schedule
+  // (a pending downgrade, or the Silver phase after a Gold→Silver downgrade). Release any
+  // attached schedule first — it leaves the subscription's current terms untouched — and
+  // trust Stripe over our DB row, which can be stale.
+  const sub = await stripe.subscriptions.retrieve(row.stripeSubscriptionId);
+  if (sub.schedule) {
+    const scheduleId = typeof sub.schedule === "string" ? sub.schedule : sub.schedule.id;
+    await stripe.subscriptionSchedules.release(scheduleId);
+    await db
+      .update(subscriptions)
+      .set({ stripeScheduleId: null, pendingPlan: null, updatedAt: new Date() })
+      .where(eq(subscriptions.userId, user.id));
+  }
+
   if (PLAN_RANK[newPlan] > PLAN_RANK[currentPlan]) {
     // Upgrade: immediate, prorated. Webhook applies the plan change to our DB.
-    const sub = await stripe.subscriptions.retrieve(row.stripeSubscriptionId);
     const item = sub.items.data[0];
     await stripe.subscriptions.update(row.stripeSubscriptionId, {
       items: [{ id: item.id, price: PAID_PLAN_PRICE_IDS[newPlan as "silver" | "gold"] }],
