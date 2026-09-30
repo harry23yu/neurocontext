@@ -61,7 +61,23 @@ export default function BillingSection({
       {upgradeTargets.length > 0 && (
         <div style={{ display: "flex", gap: "0.75rem" }}>
           {upgradeTargets.map((target) => (
-            <form key={target} action={plan === "free" ? startCheckout : changePlan}>
+            <form
+              key={target}
+              action={plan === "free" ? startCheckout : changePlan}
+              onSubmit={
+                plan === "free"
+                  ? undefined
+                  : (e) => {
+                      if (
+                        !confirm(
+                          `Upgrade to ${PLAN_LABELS[target]}? This takes effect immediately and your card will be charged a prorated amount.`,
+                        )
+                      ) {
+                        e.preventDefault();
+                      }
+                    }
+              }
+            >
               <input type="hidden" name="plan" value={target} />
               <button
                 type="submit"
@@ -85,7 +101,21 @@ export default function BillingSection({
       {downgradeTargets.length > 0 && !subscription?.pendingPlan && (
         <div style={{ display: "flex", gap: "0.75rem" }}>
           {downgradeTargets.map((target) => (
-            <form key={target} action={changePlan}>
+            <form
+              key={target}
+              action={changePlan}
+              onSubmit={(e) => {
+                if (
+                  !confirm(
+                    `Downgrade to ${PLAN_LABELS[target]}? This won't take effect until the end of your current billing period${
+                      renewalDate ? ` (${renewalDate})` : ""
+                    }.`,
+                  )
+                ) {
+                  e.preventDefault();
+                }
+              }}
+            >
               <input type="hidden" name="plan" value={target} />
               <button
                 type="submit"
