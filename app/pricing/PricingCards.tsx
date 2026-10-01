@@ -5,8 +5,20 @@ import { PLAN_LIMITS, type Plan } from "@/app/lib/plans";
 const CARDS: { plan: Plan; name: string; price: string }[] = [
   { plan: "free", name: "Free", price: "$0/mo" },
   { plan: "silver", name: "Silver", price: "$9/mo" },
-  { plan: "gold", name: "Gold", price: "$19/mo" },
+  { plan: "gold", name: "Gold", price: "$16/mo" },
 ];
+
+const TIER_STYLES: Record<Plan, { name: string }> = {
+  free: {
+    name: "var(--color-text)",
+  },
+  silver: {
+    name: "#C0C0C0",
+  },
+  gold: {
+    name: "#FFD700",
+  },
+};
 
 function historyLabel(historyDays: number): string {
   return historyDays === -1 ? "Unlimited history" : `${historyDays} days of history`;
@@ -31,6 +43,7 @@ export default function PricingCards({
       {CARDS.map(({ plan, name, price }) => {
         const limits = PLAN_LIMITS[plan];
         const isCurrent = currentPlan === plan;
+        const tier = TIER_STYLES[plan];
 
         return (
           <div
@@ -46,7 +59,7 @@ export default function PricingCards({
             }}
           >
             <div>
-              <h2 style={{ color: "var(--color-text)", fontSize: "1.25rem", margin: 0 }}>
+              <h2 style={{ color: tier.name, fontSize: "1.25rem", margin: 0 }}>
                 {name}
               </h2>
               <p style={{ color: "var(--color-muted)", margin: "0.25rem 0 0" }}>{price}</p>
@@ -107,7 +120,7 @@ export default function PricingCards({
                     cursor: "pointer",
                   }}
                 >
-                  Upgrade
+                  Select Plan
                 </button>
               </form>
             )}
