@@ -83,7 +83,7 @@ export default function PricingCards({
 
             {plan === "free" ? (
               <p style={{ color: "var(--color-muted)", fontSize: 13, margin: 0 }}>
-                {isSignedIn ? "Included with every account." : "No sign-up required."}
+                {isSignedIn ? "Included with every account." : "Create a free account to have 20 credits per week instead of 10."}
               </p>
             ) : isCurrent ? (
               <p style={{ color: "var(--color-accent)", fontSize: 13, margin: 0 }}>
