@@ -1,6 +1,5 @@
 import { getUser } from "@/app/lib/dal";
 import { getHistoryForUser } from "@/app/lib/history";
-import styles from "@/app/page.module.css";
 
 const MODE_LABEL: Record<string, string> = {
   text: "Paste text",

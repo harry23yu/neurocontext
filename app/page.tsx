@@ -17,10 +17,6 @@ type Summary = {
 const MAX_PDF_CHAR_COUNT = 5000;
 const MAX_PDF_SIZE_BYTES = 1 * 102400;
 
-function countWords(text: string): number {
-  return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-}
-
 function saveHistory(payload: {
   mode: "text" | "context" | "pdf";
   inputText: string;
@@ -383,7 +379,7 @@ export default function Home() {
             </label>
             <span>{pdfFile?.name || "No file chosen"}</span>
           </div>
-          <div className={styles.sizeHint}>PDF can't exceed 5,000 characters or 100 KB.</div>
+          <div className={styles.sizeHint}>PDF can&apos;t exceed 5,000 characters or 100 KB.</div>
           {pdfError && (
             <p className={styles.error}>
               {pdfError}

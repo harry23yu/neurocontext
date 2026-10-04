@@ -2,7 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { sql } from "drizzle-orm";
 import { db } from "./db";
-import { getUser, verifySession } from "./dal";
+import { getUser } from "./dal";
 import { getPlanLimits } from "./plans";
 
 const ANON_ID_COOKIE = "nc_anon_id";
