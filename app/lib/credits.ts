@@ -14,13 +14,17 @@ export async function getOrCreateAnonId(): Promise<string> {
   if (existing) return existing;
 
   const id = crypto.randomUUID();
-  cookieStore.set(ANON_ID_COOKIE, id, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: ANON_ID_MAX_AGE,
-    path: "/",
-  });
+  try {
+    cookieStore.set(ANON_ID_COOKIE, id, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: ANON_ID_MAX_AGE,
+      path: "/",
+    });
+  } catch {
+    // Ignore: can't set cookies outside Server Actions/Route Handlers
+  }
   return id;
 }
 
