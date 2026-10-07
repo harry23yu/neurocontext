@@ -115,6 +115,11 @@ export type VerifyState = {
   error?: string;
 };
 
+export type ResendState = {
+  error?: string;
+  success?: string;
+};
+
 export async function verifyCode(
   _prevState: VerifyState,
   formData: FormData,
@@ -169,6 +174,44 @@ export async function verifyCode(
   await reconcileAnonymousUsageOnLogin(user.id);
   await createSession(user.id);
   redirect("/");
+}
+
+export async function resendCode(
+  _prevState: ResendState,
+  formData: FormData,
+): Promise<ResendState> {
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (!email) {
+    return { error: "Email is required." };
+  }
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+
+  if (!user) {
+    return { error: "No account found with this email." };
+  }
+
+  if (user.emailVerifiedAt) {
+    return { error: "This email is already verified." };
+  }
+
+  const code = randomInt(100000, 1000000).toString();
+  const codeHash = await bcrypt.hash(code, 10);
+
+  await db.insert(verificationCodes).values({
+    userId: user.id,
+    codeHash,
+    expiresAt: new Date(Date.now() + VERIFICATION_CODE_TTL_MS),
+  });
+
+  await sendVerificationCodeEmail(email, code);
+
+  return { success: "Code sent! Check your email." };
 }
 
 export type LoginState = {
