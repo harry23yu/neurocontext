@@ -200,6 +200,19 @@ export async function resendCode(
     return { error: "This email is already verified." };
   }
 
+  const latestCode = await db.query.verificationCodes.findFirst({
+    where: eq(verificationCodes.userId, user.id),
+    orderBy: (codes, { desc }) => [desc(codes.createdAt)],
+  });
+
+  if (latestCode && latestCode.lastSentAt > new Date(Date.now() - 60000)) {
+    return { error: "Please wait 60 seconds before requesting another code." };
+  }
+
+  if (latestCode) {
+    await db.delete(verificationCodes).where(eq(verificationCodes.id, latestCode.id));
+  }
+
   const code = randomInt(100000, 1000000).toString();
   const codeHash = await bcrypt.hash(code, 10);
 
