@@ -5,6 +5,11 @@ import Header from "./components/Header";
 export const metadata: Metadata = {
   title: "NeuroContext",
   description: "Implicit language, made literal. NeuroContext explains idioms, sarcasm, and social cues in plain, literal terms.",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/apple-touch-icon.svg",
+  },
+  themeColor: "#4dd0c4",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

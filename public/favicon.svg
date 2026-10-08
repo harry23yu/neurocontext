@@ -1,0 +1,43 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="256" height="256" fill="#0f172a"/>
+
+  <!-- Main neural concept: interconnected nodes forming a brain-like shape with clarity -->
+  <!-- Center cluster (main thought/clarity) -->
+  <circle cx="128" cy="128" r="20" fill="#4dd0c4"/>
+
+  <!-- Upper nodes (understanding spreading upward) -->
+  <circle cx="100" cy="70" r="12" fill="#4dd0c4"/>
+  <circle cx="128" cy="30" r="12" fill="#4dd0c4"/>
+  <circle cx="156" cy="70" r="12" fill="#4dd0c4"/>
+
+  <!-- Lower nodes (grounding/context) -->
+  <circle cx="100" cy="186" r="12" fill="#4dd0c4"/>
+  <circle cx="128" cy="226" r="12" fill="#4dd0c4"/>
+  <circle cx="156" cy="186" r="12" fill="#4dd0c4"/>
+
+  <!-- Side nodes (expansion of understanding) -->
+  <circle cx="40" cy="128" r="12" fill="#4dd0c4"/>
+  <circle cx="216" cy="128" r="12" fill="#4dd0c4"/>
+
+  <!-- Connecting lines (neural pathways) -->
+  <!-- From center outward -->
+  <line x1="128" y1="128" x2="100" y2="70" stroke="#4dd0c4" stroke-width="6" opacity="1"/>
+  <line x1="128" y1="128" x2="128" y2="30" stroke="#4dd0c4" stroke-width="6" opacity="1"/>
+  <line x1="128" y1="128" x2="156" y2="70" stroke="#4dd0c4" stroke-width="6" opacity="1"/>
+
+  <line x1="128" y1="128" x2="100" y2="186" stroke="#4dd0c4" stroke-width="6" opacity="1"/>
+  <line x1="128" y1="128" x2="128" y2="226" stroke="#4dd0c4" stroke-width="6" opacity="1"/>
+  <line x1="128" y1="128" x2="156" y2="186" stroke="#4dd0c4" stroke-width="6" opacity="1"/>
+
+  <line x1="128" y1="128" x2="40" y2="128" stroke="#4dd0c4" stroke-width="6" opacity="1"/>
+  <line x1="128" y1="128" x2="216" y2="128" stroke="#4dd0c4" stroke-width="6" opacity="1"/>
+
+  <!-- Secondary connections (showing deeper connections) -->
+  <line x1="100" y1="70" x2="100" y2="186" stroke="#4dd0c4" stroke-width="4" opacity="0.6"/>
+  <line x1="156" y1="70" x2="156" y2="186" stroke="#4dd0c4" stroke-width="4" opacity="0.6"/>
+  <line x1="40" y1="128" x2="100" y2="70" stroke="#4dd0c4" stroke-width="4" opacity="0.6"/>
+  <line x1="216" y1="128" x2="156" y2="70" stroke="#4dd0c4" stroke-width="4" opacity="0.6"/>
+  <line x1="156" y1="186" x2="216" y2="128" stroke="#4dd0c4" stroke-width="4" opacity="0.6"/>
+  <line x1="100" y1="186" x2="40" y2="128" stroke="#4dd0c4" stroke-width="4" opacity="0.6"/>
+</svg>
