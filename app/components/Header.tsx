@@ -87,6 +87,9 @@ export default async function Header() {
         <Link href="/pricing" style={{ color: "var(--color-text)", textDecoration: "none" }}>
           Pricing
         </Link>
+        <Link href="/faq" style={{ color: "var(--color-text)", textDecoration: "none" }}>
+          FAQs
+        </Link>
         {user ? (
           <>
             <Link href="/history" style={{ color: "var(--color-text)", textDecoration: "none" }}>
