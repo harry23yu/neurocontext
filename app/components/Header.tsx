@@ -55,8 +55,17 @@ export default async function Header() {
     >
       <Link
         href="/"
-        style={{ color: "var(--color-text)", fontWeight: 600, textDecoration: "none" }}
+        style={{
+          color: "var(--color-text)",
+          fontWeight: 600,
+          fontSize: "20px",
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem",
+        }}
       >
+        <img src="/favicon.svg" alt="" width={32} height={32} />
         NeuroContext
       </Link>
 
@@ -95,7 +104,6 @@ export default async function Header() {
             <Link href="/history" style={{ color: "var(--color-text)", textDecoration: "none" }}>
               History
             </Link>
-            <span style={{ color: "var(--color-muted)", fontSize: 14 }}>{user.email}</span>
             <Link href="/account" style={{ color: "var(--color-text)", textDecoration: "none" }}>
               Account
             </Link>
