@@ -1,11 +1,63 @@
 import { getUser } from "@/app/lib/dal";
 import { getHistoryForUser } from "@/app/lib/history";
+import ExpandableText from "./ExpandableText";
 
 const MODE_LABEL: Record<string, string> = {
   text: "Paste text",
   context: "Paste with context",
   pdf: "PDF",
 };
+
+const INPUT_PREVIEW_CHARS = 500;
+const SUMMARY_PREVIEW_CHARS = 300;
+const EXPLANATION_PREVIEW_COUNT = 5;
+
+function previewText(text: string, limit: number) {
+  return text.length > limit ? `${text.slice(0, limit)}…` : text;
+}
+
+function previewPoints(points: string[], limit: number) {
+  const shown: string[] = [];
+  let total = 0;
+  for (const point of points) {
+    if (total + point.length > limit) break;
+    shown.push(point);
+    total += point.length;
+  }
+  return shown.length > 0 ? shown : [previewText(points[0], limit)];
+}
+
+function pointList(points: string[]) {
+  return (
+    <ul style={{ margin: "0.25rem 0 0 0", paddingLeft: "1.25rem", listStyleType: "disc" }}>
+      {points.map((point, i) => (
+        <li key={i}>{point}</li>
+      ))}
+    </ul>
+  );
+}
+
+function explanationList(items: { phrase: string; type: string }[]) {
+  return (
+    <div>
+      {items.map((item, i) => (
+        <div key={i} style={{ marginBottom: "0.5rem", fontSize: 13 }}>
+          <span
+            style={{
+              backgroundColor: "rgba(77, 208, 196, 0.2)",
+              padding: "0.2rem 0.5rem",
+              borderRadius: 4,
+              marginRight: "0.5rem",
+            }}
+          >
+            {item.phrase}
+          </span>
+          <span style={{ color: "var(--color-muted)", fontSize: 11 }}>({item.type})</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default async function HistoryPage() {
   const user = await getUser();
@@ -28,6 +80,7 @@ export default async function HistoryPage() {
           <table
             style={{
               width: "100%",
+              tableLayout: "fixed",
               borderCollapse: "collapse",
               backgroundColor: "var(--color-panel)",
               border: "1px solid var(--color-border)",
@@ -35,6 +88,13 @@ export default async function HistoryPage() {
               overflow: "hidden",
             }}
           >
+            <colgroup>
+              <col style={{ width: "12%" }} />
+              <col style={{ width: "26%" }} />
+              <col style={{ width: "28%" }} />
+              <col style={{ width: "19%" }} />
+              <col style={{ width: "12%" }} />
+            </colgroup>
             <thead>
               <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
                 <th
@@ -104,6 +164,10 @@ export default async function HistoryPage() {
                   | { phrase: string; type: string; explanation: string }[]
                   | null;
 
+                const summaryText = summary?.summary ?? "";
+                const keyPoints = summary?.keyPoints ?? [];
+                const keyPointsLength = keyPoints.reduce((sum, p) => sum + p.length, 0);
+
                 return (
                   <tr
                     key={entry.id}
@@ -132,56 +196,53 @@ export default async function HistoryPage() {
                         padding: "1rem",
                         color: "var(--color-text)",
                         fontSize: 14,
-                        maxWidth: 250,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
+                        wordBreak: "break-word",
                       }}
                     >
-                      {entry.inputText}
-                    </td>
-                    <td style={{ padding: "1rem", color: "var(--color-text)", fontSize: 14 }}>
-                      {summary?.summary ? (
-                        <div>
-                          <p style={{ margin: "0 0 0.5rem 0", fontSize: 13 }}>
-                            <strong>Summary:</strong> {summary.summary.substring(0, 100)}
-                            {summary.summary.length > 100 ? "..." : ""}
-                          </p>
-                          {summary.keyPoints && summary.keyPoints.length > 0 && (
-                            <p style={{ margin: 0, fontSize: 13, color: "var(--color-muted)" }}>
-                              <strong>Key Points:</strong> {summary.keyPoints.length} item
-                              {summary.keyPoints.length > 1 ? "s" : ""}
-                            </p>
-                          )}
-                        </div>
+                      {entry.inputText.length > INPUT_PREVIEW_CHARS ? (
+                        <ExpandableText
+                          preview={previewText(entry.inputText, INPUT_PREVIEW_CHARS)}
+                          full={entry.inputText}
+                        />
                       ) : (
-                        <span style={{ color: "var(--color-muted)" }}>—</span>
+                        entry.inputText
                       )}
                     </td>
-                    <td style={{ padding: "1rem", color: "var(--color-text)", fontSize: 14 }}>
-                      {explanations && explanations.length > 0 ? (
+                    <td
+                      style={{
+                        padding: "1rem",
+                        color: "var(--color-text)",
+                        fontSize: 14,
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {summaryText || keyPoints.length > 0 ? (
                         <div>
-                          {explanations.slice(0, 5).map((item, i) => (
-                            <div key={i} style={{ marginBottom: i < 2 ? "0.5rem" : 0, fontSize: 13 }}>
-                              <span
-                                style={{
-                                  backgroundColor: "rgba(77, 208, 196, 0.2)",
-                                  padding: "0.2rem 0.5rem",
-                                  borderRadius: 4,
-                                  marginRight: "0.5rem",
-                                }}
-                              >
-                                {item.phrase}
-                              </span>
-                              <span style={{ color: "var(--color-muted)", fontSize: 11 }}>
-                                ({item.type})
-                              </span>
+                          {summaryText && (
+                            <div style={{ margin: "0 0 0.5rem 0", fontSize: 13 }}>
+                              <strong>Summary:</strong>{" "}
+                              {summaryText.length > SUMMARY_PREVIEW_CHARS ? (
+                                <ExpandableText
+                                  preview={previewText(summaryText, SUMMARY_PREVIEW_CHARS)}
+                                  full={summaryText}
+                                />
+                              ) : (
+                                summaryText
+                              )}
                             </div>
-                          ))}
-                          {explanations.length > 3 && (
-                            <p style={{ margin: "0.5rem 0 0 0", color: "var(--color-muted)", fontSize: 12 }}>
-                              +{explanations.length - 3} more
-                            </p>
+                          )}
+                          {keyPoints.length > 0 && (
+                            <div style={{ fontSize: 13, color: "var(--color-text)" }}>
+                              <strong>Key Points:</strong>
+                              {keyPointsLength > SUMMARY_PREVIEW_CHARS ? (
+                                <ExpandableText
+                                  preview={pointList(previewPoints(keyPoints, SUMMARY_PREVIEW_CHARS))}
+                                  full={pointList(keyPoints)}
+                                />
+                              ) : (
+                                pointList(keyPoints)
+                              )}
+                            </div>
                           )}
                         </div>
                       ) : (
@@ -191,9 +252,29 @@ export default async function HistoryPage() {
                     <td
                       style={{
                         padding: "1rem",
+                        color: "var(--color-text)",
+                        fontSize: 14,
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {explanations && explanations.length > 0 ? (
+                        explanations.length > EXPLANATION_PREVIEW_COUNT ? (
+                          <ExpandableText
+                            preview={explanationList(explanations.slice(0, EXPLANATION_PREVIEW_COUNT))}
+                            full={explanationList(explanations)}
+                          />
+                        ) : (
+                          explanationList(explanations)
+                        )
+                      ) : (
+                        <span style={{ color: "var(--color-muted)" }}>—</span>
+                      )}
+                    </td>
+                    <td
+                      style={{
+                        padding: "1rem",
                         color: "var(--color-muted)",
                         fontSize: 13,
-                        whiteSpace: "nowrap",
                       }}
                     >
                       {new Date(entry.createdAt).toLocaleString()}
