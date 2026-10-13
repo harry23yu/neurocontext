@@ -3,6 +3,7 @@ import { getUser } from "@/app/lib/dal";
 import { HISTORY_PAGE_SIZE, getHistoryPageForUser } from "@/app/lib/history";
 import ExpandableText from "./ExpandableText";
 import Pagination from "./Pagination";
+import { deleteHistoryEntry } from "./actions";
 
 const MODE_LABEL: Record<string, string> = {
   text: "Paste text",
@@ -289,7 +290,41 @@ export default async function HistoryPage({
                         fontSize: 13,
                       }}
                     >
-                      {new Date(entry.createdAt).toLocaleString()}
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                        <span>{new Date(entry.createdAt).toLocaleString()}</span>
+                        <form action={deleteHistoryEntry.bind(null, entry.id)}>
+                          <button
+                            type="submit"
+                            aria-label="Delete entry"
+                            title="Delete entry"
+                            style={{
+                              background: "none",
+                              border: "none",
+                              padding: 0,
+                              cursor: "pointer",
+                              color: "#ef4444",
+                              lineHeight: 0,
+                            }}
+                          >
+                            <svg
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M3 6h18" />
+                              <path d="M8 6V4h8v2" />
+                              <path d="M19 6l-1 14H6L5 6" />
+                              <path d="M10 11v6" />
+                              <path d="M14 11v6" />
+                            </svg>
+                          </button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 );
