@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { getUser } from "@/app/lib/dal";
-import { getHistoryForUser } from "@/app/lib/history";
+import { HISTORY_PAGE_SIZE, getHistoryPageForUser } from "@/app/lib/history";
 import ExpandableText from "./ExpandableText";
+import Pagination from "./Pagination";
 
 const MODE_LABEL: Record<string, string> = {
   text: "Paste text",
@@ -59,11 +61,21 @@ function explanationList(items: { phrase: string; type: string }[]) {
   );
 }
 
-export default async function HistoryPage() {
+export default async function HistoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const user = await getUser();
   if (!user) return null;
 
-  const entries = await getHistoryForUser(user.id);
+  const { page: pageParam } = await searchParams;
+  const requestedPage = Math.max(1, Number.parseInt(pageParam ?? "1", 10) || 1);
+
+  const { entries, total } = await getHistoryPageForUser(user.id, requestedPage);
+  const totalPages = Math.max(1, Math.ceil(total / HISTORY_PAGE_SIZE));
+
+  if (requestedPage > totalPages) redirect(`/history?page=${totalPages}`);
 
   return (
     <main style={{ maxWidth: 1400, margin: "0 auto", padding: "4rem 1rem" }}>
@@ -286,6 +298,8 @@ export default async function HistoryPage() {
           </table>
         </div>
       )}
+
+      <Pagination currentPage={requestedPage} totalPages={totalPages} />
     </main>
   );
 }

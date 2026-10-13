@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, gte } from "drizzle-orm";
+import { and, count, desc, eq, gte } from "drizzle-orm";
 import { db } from "./db";
 import { savedHistory, users } from "./db/schema";
 import { UNLIMITED_HISTORY_DAYS } from "./plans";
@@ -29,27 +29,33 @@ export async function saveHistoryEntry({
   });
 }
 
-export async function getHistoryForUser(userId: string) {
+export const HISTORY_PAGE_SIZE = 25;
+
+export async function getHistoryPageForUser(userId: string, page: number) {
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: { historyRetentionDays: true },
   });
-  if (!user) return [];
+  if (!user) return { entries: [], total: 0 };
 
-  if (user.historyRetentionDays === UNLIMITED_HISTORY_DAYS) {
-    return db
-      .select()
-      .from(savedHistory)
-      .where(eq(savedHistory.userId, userId))
-      .orderBy(desc(savedHistory.createdAt));
-  }
+  const where =
+    user.historyRetentionDays === UNLIMITED_HISTORY_DAYS
+      ? eq(savedHistory.userId, userId)
+      : (() => {
+          const cutoff = new Date();
+          cutoff.setDate(cutoff.getDate() - user.historyRetentionDays);
+          return and(eq(savedHistory.userId, userId), gte(savedHistory.createdAt, cutoff));
+        })();
 
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - user.historyRetentionDays);
+  const [{ total }] = await db.select({ total: count() }).from(savedHistory).where(where);
 
-  return db
+  const entries = await db
     .select()
     .from(savedHistory)
-    .where(and(eq(savedHistory.userId, userId), gte(savedHistory.createdAt, cutoff)))
-    .orderBy(desc(savedHistory.createdAt));
+    .where(where)
+    .orderBy(desc(savedHistory.createdAt))
+    .limit(HISTORY_PAGE_SIZE)
+    .offset((page - 1) * HISTORY_PAGE_SIZE);
+
+  return { entries, total };
 }
