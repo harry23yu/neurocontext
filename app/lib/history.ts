@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, gte } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
 import { db } from "./db";
 import { savedHistory, users } from "./db/schema";
 import { UNLIMITED_HISTORY_DAYS } from "./plans";
@@ -36,16 +36,9 @@ export async function getHistoryPageForUser(userId: string, page: number) {
     where: eq(users.id, userId),
     columns: { historyRetentionDays: true },
   });
-  if (!user) return { entries: [], total: 0 };
+  if (!user) return { entries: [], total: 0, historyRetentionDays: UNLIMITED_HISTORY_DAYS };
 
-  const where =
-    user.historyRetentionDays === UNLIMITED_HISTORY_DAYS
-      ? eq(savedHistory.userId, userId)
-      : (() => {
-          const cutoff = new Date();
-          cutoff.setDate(cutoff.getDate() - user.historyRetentionDays);
-          return and(eq(savedHistory.userId, userId), gte(savedHistory.createdAt, cutoff));
-        })();
+  const where = eq(savedHistory.userId, userId);
 
   const [{ total }] = await db.select({ total: count() }).from(savedHistory).where(where);
 
@@ -57,5 +50,5 @@ export async function getHistoryPageForUser(userId: string, page: number) {
     .limit(HISTORY_PAGE_SIZE)
     .offset((page - 1) * HISTORY_PAGE_SIZE);
 
-  return { entries, total };
+  return { entries, total, historyRetentionDays: user.historyRetentionDays };
 }

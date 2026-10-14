@@ -1,6 +1,9 @@
+import { Fragment, type ReactNode } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/app/lib/dal";
 import { HISTORY_PAGE_SIZE, getHistoryPageForUser } from "@/app/lib/history";
+import { UNLIMITED_HISTORY_DAYS } from "@/app/lib/plans";
 import ExpandableText from "./ExpandableText";
 import Pagination from "./Pagination";
 import { deleteHistoryEntry } from "./actions";
@@ -11,9 +14,34 @@ const MODE_LABEL: Record<string, string> = {
   pdf: "PDF",
 };
 
+const upgradeLinkStyle = { color: "var(--color-accent)", textDecoration: "underline" };
+
+const UPGRADE_REMINDER: Record<string, ReactNode> = {
+  free: (
+    <>
+      You are on free plan, which shows 7 days of history.{" "}
+      <Link href="/pricing" style={upgradeLinkStyle}>Subscribe</Link>
+      {" "}to Silver for 30 days of history, or Gold for unlimited history.
+    </>
+  ),
+  silver: (
+    <>
+      You are on silver plan, which shows 30 days of history.{" "}
+      <Link href="/pricing" style={upgradeLinkStyle}>Subscribe</Link>
+      {" "}to Gold for unlimited history.
+    </>
+  ),
+};
+
 const INPUT_PREVIEW_CHARS = 500;
 const SUMMARY_PREVIEW_CHARS = 300;
 const EXPLANATION_PREVIEW_COUNT = 5;
+
+const blurredCellStyle = {
+  filter: "blur(6px)",
+  userSelect: "none",
+  pointerEvents: "none",
+} as const;
 
 function previewText(text: string, limit: number) {
   return text.length > limit ? `${text.slice(0, limit)}…` : text;
@@ -73,14 +101,22 @@ export default async function HistoryPage({
   const { page: pageParam } = await searchParams;
   const requestedPage = Math.max(1, Number.parseInt(pageParam ?? "1", 10) || 1);
 
-  const { entries, total } = await getHistoryPageForUser(user.id, requestedPage);
+  const { entries, total, historyRetentionDays } = await getHistoryPageForUser(user.id, requestedPage);
   const totalPages = Math.max(1, Math.ceil(total / HISTORY_PAGE_SIZE));
 
   if (requestedPage > totalPages) redirect(`/history?page=${totalPages}`);
 
+  const cutoff =
+    historyRetentionDays === UNLIMITED_HISTORY_DAYS
+      ? null
+      : new Date(Date.now() - historyRetentionDays * 24 * 60 * 60 * 1000);
+  const isBlurred = (createdAt: Date) => cutoff !== null && createdAt < cutoff;
+  const firstBlurredIndex = entries.findIndex((entry) => isBlurred(entry.createdAt));
+  const reminder = UPGRADE_REMINDER[user.plan] ?? null;
+
   return (
     <main style={{ maxWidth: 1400, margin: "0 auto", padding: "4rem 1rem" }}>
-      <h1 style={{ color: "var(--color-text)", fontSize: "1.75rem", marginBottom: "1.5rem" }}>
+      <h1 style={{ color: "var(--color-text)", fontSize: "1.75rem", marginBottom: "1.5rem", textAlign: "center" }}>
         History
       </h1>
 
@@ -180,153 +216,182 @@ export default async function HistoryPage({
                 const summaryText = summary?.summary ?? "";
                 const keyPoints = summary?.keyPoints ?? [];
                 const keyPointsLength = keyPoints.reduce((sum, p) => sum + p.length, 0);
+                const blurred = isBlurred(entry.createdAt);
 
                 return (
-                  <tr
-                    key={entry.id}
-                    style={{
-                      borderBottom: "1px solid var(--color-border)",
-                      backgroundColor: idx % 2 === 0 ? "var(--color-panel)" : "rgba(255,255,255,0.02)",
-                    }}
-                  >
-                    <td style={{ padding: "1rem", color: "var(--color-text)", fontSize: 14 }}>
-                      <span
+                  <Fragment key={entry.id}>
+                    {idx === firstBlurredIndex && reminder && (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          style={{
+                            padding: "1rem",
+                            textAlign: "center",
+                            color: "var(--color-text)",
+                            fontSize: 14,
+                            backgroundColor: "rgba(77, 208, 196, 0.08)",
+                            borderBottom: "1px solid var(--color-border)",
+                          }}
+                        >
+                          {reminder}
+                        </td>
+                      </tr>
+                    )}
+                    <tr
+                      style={{
+                        borderBottom: "1px solid var(--color-border)",
+                        backgroundColor: idx % 2 === 0 ? "var(--color-panel)" : "rgba(255,255,255,0.02)",
+                      }}
+                    >
+                      <td
                         style={{
-                          backgroundColor: "var(--color-accent)",
-                          color: "var(--color-bg)",
-                          padding: "0.25rem 0.75rem",
-                          borderRadius: 6,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          whiteSpace: "nowrap",
+                          padding: "1rem",
+                          color: "var(--color-text)",
+                          fontSize: 14,
+                          ...(blurred ? blurredCellStyle : {}),
                         }}
                       >
-                        {MODE_LABEL[entry.mode] ?? entry.mode}
-                      </span>
-                    </td>
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "var(--color-text)",
-                        fontSize: 14,
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {entry.inputText.length > INPUT_PREVIEW_CHARS ? (
-                        <ExpandableText
-                          preview={previewText(entry.inputText, INPUT_PREVIEW_CHARS)}
-                          full={entry.inputText}
-                        />
-                      ) : (
-                        entry.inputText
-                      )}
-                    </td>
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "var(--color-text)",
-                        fontSize: 14,
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {summaryText || keyPoints.length > 0 ? (
-                        <div>
-                          {summaryText && (
-                            <div style={{ margin: "0 0 0.5rem 0", fontSize: 13 }}>
-                              <strong>Summary:</strong>{" "}
-                              {summaryText.length > SUMMARY_PREVIEW_CHARS ? (
-                                <ExpandableText
-                                  preview={previewText(summaryText, SUMMARY_PREVIEW_CHARS)}
-                                  full={summaryText}
-                                />
-                              ) : (
-                                summaryText
-                              )}
-                            </div>
-                          )}
-                          {keyPoints.length > 0 && (
-                            <div style={{ fontSize: 13, color: "var(--color-text)" }}>
-                              <strong>Key Points:</strong>
-                              {keyPointsLength > SUMMARY_PREVIEW_CHARS ? (
-                                <ExpandableText
-                                  preview={pointList(previewPoints(keyPoints, SUMMARY_PREVIEW_CHARS))}
-                                  full={pointList(keyPoints)}
-                                />
-                              ) : (
-                                pointList(keyPoints)
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <span style={{ color: "var(--color-muted)" }}>—</span>
-                      )}
-                    </td>
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "var(--color-text)",
-                        fontSize: 14,
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {explanations && explanations.length > 0 ? (
-                        explanations.length > EXPLANATION_PREVIEW_COUNT ? (
+                        <span
+                          style={{
+                            backgroundColor: "var(--color-accent)",
+                            color: "var(--color-bg)",
+                            padding: "0.25rem 0.75rem",
+                            borderRadius: 6,
+                            fontSize: 12,
+                            fontWeight: 600,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {MODE_LABEL[entry.mode] ?? entry.mode}
+                        </span>
+                      </td>
+                      <td
+                        style={{
+                          padding: "1rem",
+                          color: "var(--color-text)",
+                          fontSize: 14,
+                          wordBreak: "break-word",
+                          ...(blurred ? blurredCellStyle : {}),
+                        }}
+                      >
+                        {entry.inputText.length > INPUT_PREVIEW_CHARS ? (
                           <ExpandableText
-                            preview={explanationList(explanations.slice(0, EXPLANATION_PREVIEW_COUNT))}
-                            full={explanationList(explanations)}
+                            preview={previewText(entry.inputText, INPUT_PREVIEW_CHARS)}
+                            full={entry.inputText}
                           />
                         ) : (
-                          explanationList(explanations)
-                        )
-                      ) : (
-                        <span style={{ color: "var(--color-muted)" }}>—</span>
-                      )}
-                    </td>
-                    <td
-                      style={{
-                        padding: "1rem",
-                        color: "var(--color-muted)",
-                        fontSize: 13,
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                        <span>{new Date(entry.createdAt).toLocaleString()}</span>
-                        <form action={deleteHistoryEntry.bind(null, entry.id)}>
-                          <button
-                            type="submit"
-                            aria-label="Delete entry"
-                            title="Delete entry"
-                            style={{
-                              background: "none",
-                              border: "none",
-                              padding: 0,
-                              cursor: "pointer",
-                              color: "#ef4444",
-                              lineHeight: 0,
-                            }}
-                          >
-                            <svg
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                          entry.inputText
+                        )}
+                      </td>
+                      <td
+                        style={{
+                          padding: "1rem",
+                          color: "var(--color-text)",
+                          fontSize: 14,
+                          wordBreak: "break-word",
+                          ...(blurred ? blurredCellStyle : {}),
+                        }}
+                      >
+                        {summaryText || keyPoints.length > 0 ? (
+                          <div>
+                            {summaryText && (
+                              <div style={{ margin: "0 0 0.5rem 0", fontSize: 13 }}>
+                                <strong>Summary:</strong>{" "}
+                                {summaryText.length > SUMMARY_PREVIEW_CHARS ? (
+                                  <ExpandableText
+                                    preview={previewText(summaryText, SUMMARY_PREVIEW_CHARS)}
+                                    full={summaryText}
+                                  />
+                                ) : (
+                                  summaryText
+                                )}
+                              </div>
+                            )}
+                            {keyPoints.length > 0 && (
+                              <div style={{ fontSize: 13, color: "var(--color-text)" }}>
+                                <strong>Key Points:</strong>
+                                {keyPointsLength > SUMMARY_PREVIEW_CHARS ? (
+                                  <ExpandableText
+                                    preview={pointList(previewPoints(keyPoints, SUMMARY_PREVIEW_CHARS))}
+                                    full={pointList(keyPoints)}
+                                  />
+                                ) : (
+                                  pointList(keyPoints)
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{ color: "var(--color-muted)" }}>—</span>
+                        )}
+                      </td>
+                      <td
+                        style={{
+                          padding: "1rem",
+                          color: "var(--color-text)",
+                          fontSize: 14,
+                          wordBreak: "break-word",
+                          ...(blurred ? blurredCellStyle : {}),
+                        }}
+                      >
+                        {explanations && explanations.length > 0 ? (
+                          explanations.length > EXPLANATION_PREVIEW_COUNT ? (
+                            <ExpandableText
+                              preview={explanationList(explanations.slice(0, EXPLANATION_PREVIEW_COUNT))}
+                              full={explanationList(explanations)}
+                            />
+                          ) : (
+                            explanationList(explanations)
+                          )
+                        ) : (
+                          <span style={{ color: "var(--color-muted)" }}>—</span>
+                        )}
+                      </td>
+                      <td
+                        style={{
+                          padding: "1rem",
+                          color: "var(--color-muted)",
+                          fontSize: 13,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+                          <span>{new Date(entry.createdAt).toLocaleString()}</span>
+                          <form action={deleteHistoryEntry.bind(null, entry.id)}>
+                            <button
+                              type="submit"
+                              aria-label="Delete entry"
+                              title="Delete entry"
+                              style={{
+                                background: "none",
+                                border: "none",
+                                padding: 0,
+                                cursor: "pointer",
+                                color: "#ef4444",
+                                lineHeight: 0,
+                              }}
                             >
-                              <path d="M3 6h18" />
-                              <path d="M8 6V4h8v2" />
-                              <path d="M19 6l-1 14H6L5 6" />
-                              <path d="M10 11v6" />
-                              <path d="M14 11v6" />
-                            </svg>
-                          </button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
+                              <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4h8v2" />
+                                <path d="M19 6l-1 14H6L5 6" />
+                                <path d="M10 11v6" />
+                                <path d="M14 11v6" />
+                              </svg>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  </Fragment>
                 );
               })}
             </tbody>
