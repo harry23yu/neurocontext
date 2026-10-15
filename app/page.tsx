@@ -85,7 +85,7 @@ export default function LandingFull() {
             borderRadius: "1rem",
             textAlign: "center",
           }}>
-            <h3 style={{ color: "var(--color-accent)", marginBottom: "0.5rem", fontSize: "1.25rem" }}>Paste Text</h3>
+            <h3 style={{ color: "var(--color-accent)", marginBottom: "0.5rem", fontSize: "1.25rem" }}>Paste short text</h3>
             <p style={{ color: "var(--color-muted)", lineHeight: "1.6" }}>
               Quick phrases or sentences. Get instant explanations for idioms, sarcasm, and social cues.
             </p>
@@ -99,7 +99,7 @@ export default function LandingFull() {
             borderRadius: "1rem",
             textAlign: "center",
           }}>
-            <h3 style={{ color: "var(--color-accent)", marginBottom: "0.5rem", fontSize: "1.25rem" }}>Paste with Context</h3>
+            <h3 style={{ color: "var(--color-accent)", marginBottom: "0.5rem", fontSize: "1.25rem" }}>Paste longer text with context</h3>
             <p style={{ color: "var(--color-muted)", lineHeight: "1.6" }}>
               Longer texts with source context. Get summary, key points, and implicit language breakdown.
             </p>

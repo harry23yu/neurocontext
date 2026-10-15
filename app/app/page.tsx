@@ -309,13 +309,13 @@ export default function Home() {
 
       <div className={styles.modeToggle}>
         <button type="button" className={styles.modeButton} onClick={() => handleModeChange("text")} disabled={loading || contextLoading || pdfLoading} style={mode === "text" ? { background: "#4dd0c4", color: "#14171f", fontWeight: "600" } : {}}>
-          Paste text
+          Paste short text (1 credit)
         </button>
         <button type="button" className={styles.modeButton} onClick={() => handleModeChange("context")} disabled={loading || contextLoading || pdfLoading} style={mode === "context" ? { background: "#4dd0c4", color: "#14171f", fontWeight: "600" } : {}}>
-          Paste with context
+          Paste longer text with context (3 credits)
         </button>
         <button type="button" className={styles.modeButton} onClick={() => handleModeChange("pdf")} disabled={loading || contextLoading || pdfLoading} style={mode === "pdf" ? { background: "#4dd0c4", color: "#14171f", fontWeight: "600" } : {}}>
-          Upload PDF
+          Upload PDF (3 credits)
         </button>
       </div>
 
@@ -349,7 +349,7 @@ export default function Home() {
             onChange={(e) => setContextText(e.target.value)}
             rows={8}
             maxLength={5000}
-            placeholder="Paste text (501-5,000 characters)..."
+            placeholder="Paste longer text with context (501-5,000 characters)..."
           />
           <div className={styles.charCount}>{contextText.length}/5,000 characters</div>
           <input

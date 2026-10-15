@@ -9,9 +9,9 @@ import Pagination from "./Pagination";
 import { deleteHistoryEntry } from "./actions";
 
 const MODE_LABEL: Record<string, string> = {
-  text: "Paste text",
-  context: "Paste with context",
-  pdf: "PDF",
+  text: "Paste short text",
+  context: "Paste longer text with context",
+  pdf: "Upload PDF",
 };
 
 const upgradeLinkStyle = { color: "var(--color-accent)", textDecoration: "underline" };
@@ -259,7 +259,8 @@ export default async function HistoryPage({
                             borderRadius: 6,
                             fontSize: 12,
                             fontWeight: 600,
-                            whiteSpace: "nowrap",
+                            display: "inline-block",
+                            lineHeight: 1.3,
                           }}
                         >
                           {MODE_LABEL[entry.mode] ?? entry.mode}

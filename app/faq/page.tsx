@@ -14,17 +14,17 @@ const faqs: { question: string; answer: string }[] = [
   {
     question: "How do I use it?",
     answer:
-      "Choose one of three modes: paste a short text, paste a longer text with an optional note about where it's from, or upload a PDF. NeuroContext returns the implicit language it finds, and summaries and key points for longer text and PDFs.",
+      "Choose one of three modes: paste short text, paste longer text with context (an optional note about where it's from), or upload a PDF. NeuroContext returns the implicit language it finds, and summaries and key points for longer text and PDFs.",
   },
   {
     question: "What are the text and PDF limits?",
     answer:
-      "Paste a short text: up to 500 characters. Paste with context: 501 to 5,000 characters. PDF: up to 5,000 characters of text and 100 KB in file size.",
+      "Paste short text: up to 500 characters. Paste longer text with context: 501 to 5,000 characters. PDF: up to 5,000 characters of text and 100 KB in file size.",
   },
   {
     question: "How do credits work?",
     answer:
-      "Pasting a short text uses 1 credit. Pasting with context and uploading a PDF uses 3 credits. Visitors without an account get 10 credits per week. Free accounts get 20 credits per week. Silver gets 100 credits per week, and Gold gets 200 credits per week.",
+      "Pasting a short text uses 1 credit. Pasting a longer text with optional context and uploading a PDF uses 3 credits. Visitors without an account get 10 credits per week. Free accounts get 20 credits per week. Silver gets 100 credits per week, and Gold gets 200 credits per week.",
   },
   {
     question: "How long is my history saved?",
