@@ -1,6 +1,7 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
-const faqs: { question: string; answer: string }[] = [
+const faqs: { question: string; answer: ReactNode }[] = [
   {
     question: "What is the inspiration behind NeuroContext?",
     answer:
@@ -37,21 +38,38 @@ const faqs: { question: string; answer: string }[] = [
       "It's designed to flag only clear cases of implicit language to avoid false alarms, but it can miss things or misread context. Use it as a helpful second opinion, not the final word.",
   },
   {
-    question: "Can I cancel or change my plan?",
-    answer:
-      "Yes. You can switch plans, downgrade, or manage billing from your account page at any time.",
+    question: "Can I cancel or change my subscription plan?",
+    answer: (
+      <>
+        Yes. You can switch <a href="/pricing" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>plans</a>, downgrade, or manage billing from your account page at any time.
+      </>
+    ),
   },
   {
     question: "What happens to my paid plan if I delete my account?",
     answer:
       "Paid subscriptions are canceled when you delete your account, and refunds are not provided for the remaining period.",
   },
+  {
+    question: "If I delete my account, is it gone forever?",
+    answer:
+      "Yes, if you delete your account, it is gone forever. If you want to use NeuroContext with an account again, you have to sign up using a different email address.",
+  },
+  {
+    question: "Still have questions?",
+    answer: (
+      <>
+        Contact Harry Yu {" "}
+        <a href="mailto:harry23yu@gmail.com" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>here</a>.
+      </>
+    ),
+  },
 ];
 
 export default function Faq() {
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", padding: "4rem 1.5rem" }}>
-      <h1 style={{ fontSize: "2.5rem", fontWeight: "700", marginBottom: "2.5rem", color: "var(--color-text)" }}>
+      <h1 style={{ fontSize: "2.5rem", fontWeight: "700", marginBottom: "2.5rem", color: "var(--color-text)", textAlign: "center" }}>
         Frequently Asked Questions
       </h1>
 
@@ -66,8 +84,8 @@ export default function Faq() {
         ))}
       </div>
 
-      <p style={{ marginTop: "3rem", color: "var(--color-muted)" }}>
-        <Link href="/" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>
+      <p style={{ marginTop: "3rem", color: "var(--color-muted)", textAlign: "center"}}>
+        <Link href="/" style={{ color: "var(--color-accent)", textDecoration: "underline"}}>
           Back to home
         </Link>
       </p>
