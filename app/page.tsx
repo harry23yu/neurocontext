@@ -320,8 +320,14 @@ export default function LandingFull() {
           <Link href="/faq" style={{ color: "var(--color-accent)", marginRight: "2rem", textDecoration: "none" }}>
             FAQ
           </Link>
-          <Link href="/pricing" style={{ color: "var(--color-accent)", textDecoration: "none" }}>
+          <Link href="/pricing" style={{ color: "var(--color-accent)", marginRight: "2rem", textDecoration: "none" }}>
             Pricing
+          </Link>
+          <Link href="/privacy" style={{ color: "var(--color-accent)", marginRight: "2rem", textDecoration: "none" }}>
+            Privacy
+          </Link>
+          <Link href="/terms" style={{ color: "var(--color-accent)", textDecoration: "none" }}>
+            Terms
           </Link>
         </p>
       </section>
