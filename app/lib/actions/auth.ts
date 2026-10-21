@@ -19,6 +19,7 @@ export type SignupState = {
   fieldErrors?: {
     email?: string[];
     password?: string[];
+    agree?: string[];
   };
 };
 
@@ -44,6 +45,7 @@ export async function signup(
   const parsed = SignupSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
+    agree: formData.get("agree") === "on",
   });
 
   if (!parsed.success) {

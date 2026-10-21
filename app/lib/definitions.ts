@@ -20,6 +20,9 @@ export const SignupSchema = z.object({
       PASSWORD_REGEX,
       "Password must be at least 8 characters and include a letter, a digit, and a special character.",
     ),
+  agree: z
+    .boolean()
+    .refine((value) => value, "You must be 13 or older and agree to the Terms and Privacy Policy to sign up."),
 });
 
 export type SignupInput = z.infer<typeof SignupSchema>;

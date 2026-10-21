@@ -79,6 +79,28 @@ export default function SignupForm() {
         ))}
       </label>
 
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+        <label style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem", color: "var(--color-muted)", fontSize: 14, lineHeight: 1.5 }}>
+          <input type="checkbox" name="agree" required style={{ marginTop: "0.25rem" }} />
+          <span>
+            I&rsquo;m 13 or older and I agree to the{" "}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>
+              Privacy Policy
+            </a>
+            .
+          </span>
+        </label>
+        {state.fieldErrors?.agree?.map((msg) => (
+          <span key={msg} style={{ color: "var(--color-error)", fontSize: 13 }}>
+            {msg}
+          </span>
+        ))}
+      </div>
+
       <button
         type="submit"
         disabled={pending}
