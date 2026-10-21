@@ -24,7 +24,7 @@ export default function Terms() {
         <section>
           <h2 style={sectionHeading}>Eligibility</h2>
           <p style={bodyText}>
-            Anyone can use NeuroContext&rsquo;s free features, and anyone can buy a paid plan. By using NeuroContext, you confirm that you are able to agree to these Terms.
+            You must be at least 13 to create an account or buy a paid plan. Free features can be used without an account. A parent or guardian may use NeuroContext on their own account, including to help a younger child, and is responsible for that use.
           </p>
         </section>
 

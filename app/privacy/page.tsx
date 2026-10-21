@@ -94,6 +94,14 @@ export default function Privacy() {
         </section>
 
         <section>
+          <h2 style={sectionHeading}>Children</h2>
+          <p style={bodyText}>
+            NeuroContext is designed for people 13 and older, including teens and adults who are learning English. I do not knowingly collect personal information from children under 13. Free features can be used without an account. If you are a parent or guardian and believe your child under 13 has created an account, contact me at{" "}
+            <a href="mailto:harry23yu@gmail.com" style={linkStyle}>harry23yu@gmail.com</a> and I will delete it and its data promptly.
+          </p>
+        </section>
+
+        <section>
           <h2 style={sectionHeading}>Security</h2>
           <p style={bodyText}>
             I use reasonable safeguards, including hashed passwords and signed session cookies. No online service can be completely secure, so I cannot guarantee that your information will never be accessed without authorization.
