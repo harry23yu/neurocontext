@@ -11,7 +11,7 @@ export default function Terms() {
       <h1 style={{ fontSize: "2.5rem", fontWeight: "700", marginBottom: "0.5rem", color: "var(--color-text)", textAlign: "center" }}>
         Terms of Service
       </h1>
-      <p style={{ ...bodyText, textAlign: "center", marginBottom: "2.5rem" }}>Last updated: October 19, 2026</p>
+      <p style={{ ...bodyText, textAlign: "center", marginBottom: "2.5rem" }}>Last updated: October 21, 2026</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
         <section>
@@ -68,7 +68,7 @@ export default function Terms() {
         <section>
           <h2 style={sectionHeading}>Paid subscriptions and billing</h2>
           <p style={bodyText}>
-            Silver and Gold are monthly subscriptions billed through Stripe. They renew automatically until you cancel. You can switch plans, downgrade, or cancel from your account page at any time. Cancellation takes effect at the end of your current billing period.
+            Silver and Gold are monthly subscriptions billed through Stripe. They renew automatically until you cancel. You can switch plans, downgrade, or cancel from your account page at any time. Upgrades take effect immediately and are prorated. Downgrades and cancellations take effect at the end of your current billing period.
           </p>
           <p style={{ ...bodyText, marginTop: "0.75rem" }}>
             Payments are non-refundable, except as required by law. If you delete a paid account, no refund is provided for the remaining period, and you would need a new account and a new payment to subscribe again.

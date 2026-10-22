@@ -11,7 +11,7 @@ export default function Privacy() {
       <h1 style={{ fontSize: "2.5rem", fontWeight: "700", marginBottom: "0.5rem", color: "var(--color-text)", textAlign: "center" }}>
         Privacy Policy
       </h1>
-      <p style={{ ...bodyText, textAlign: "center", marginBottom: "2.5rem" }}>Last updated: October 19, 2026</p>
+      <p style={{ ...bodyText, textAlign: "center", marginBottom: "2.5rem" }}>Last updated: October 21, 2026</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
         <section>
@@ -54,7 +54,7 @@ export default function Privacy() {
             I share information only with the services needed to run NeuroContext:
           </p>
           <ul style={listStyle}>
-            <li><strong>Anthropic</strong>: receives the text you submit so it can generate explanations and summaries.</li>
+            <li><strong>Anthropic</strong>: receives the text you submit so it can generate explanations and summaries. Under Anthropic&rsquo;s current policy, it deletes this input and the generated output within 30 days. It may keep them longer if needed to enforce its usage policy (up to 2 years for content its safety systems flag) or to comply with the law.</li>
             <li><strong>Vercel</strong>: hosts the website and runs my server code.</li>
             <li><strong>Supabase</strong>: stores account data and saved history.</li>
             <li><strong>Stripe</strong>: processes subscription payments.</li>
@@ -75,7 +75,7 @@ export default function Privacy() {
         <section>
           <h2 style={sectionHeading}>How long I keep information</h2>
           <p style={bodyText}>
-            I keep account information and saved history until you delete them. Depending on your plan, older history may be blurred on the history page, but it is still kept. When you delete your account, I remove your account, your saved history, and your credit records from my database. I keep your email address on a block list so it cannot be used to create a new account. Backups and provider logs may keep copies for a limited time after deletion.
+            I keep account information and saved history until you delete them. Depending on your plan, older history may be blurred on the history page, but it is still kept. When you delete your account, I remove your account, your saved history, and your credit records from my database. I keep your email address on a block list so it cannot be used to create a new account. Backups and provider logs may keep copies for up to 30 days after deletion, and text already sent to Anthropic is handled under its retention policy described above.
           </p>
         </section>
 
