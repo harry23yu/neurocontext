@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ExampleShowcase from "./components/ExampleShowcase";
 
 export default function LandingFull() {
   return (
@@ -122,6 +123,15 @@ export default function LandingFull() {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* Example */}
+      <section style={{
+        maxWidth: "1200px",
+        margin: "0 auto",
+        padding: "4rem 1.5rem",
+      }}>
+        <ExampleShowcase />
       </section>
 
       {/* Why NeuroContext */}
