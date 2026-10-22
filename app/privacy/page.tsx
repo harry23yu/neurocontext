@@ -37,7 +37,7 @@ export default function Privacy() {
             <strong>Payment information.</strong> Payments are handled by Stripe. I do not see or store your card number. I store your Stripe customer and subscription IDs, your plan, your subscription status, and when your current billing period ends.
           </p>
           <p style={{ ...bodyText, marginTop: "0.75rem" }}>
-            <strong>Usage and technical information.</strong> I keep credit usage counts per week for accounts and for anonymous visitors. My hosting provider keeps standard server logs, which can include technical details such as IP address, browser type, and the pages requested.
+            <strong>Usage and technical information.</strong> I keep credit usage counts per week for accounts and for anonymous visitors. To limit abuse by anonymous visitors, I also keep a weekly count tied to a keyed hash of your IP address. I do not store your IP address itself in that count. My hosting provider keeps standard server logs, which can include technical details such as IP address, browser type, and the pages requested.
           </p>
         </section>
 

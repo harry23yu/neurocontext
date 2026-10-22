@@ -5,11 +5,10 @@ import { logout } from "@/app/lib/actions/auth";
 import { db } from "@/app/lib/db";
 import { creditUsage } from "@/app/lib/db/schema";
 import { getPlanLimits } from "@/app/lib/plans";
-import { getWeekStart, getOrCreateAnonId } from "@/app/lib/credits";
+import { getWeekStart, getAnonRemaining } from "@/app/lib/credits";
 
 export default async function Header() {
   const user = await getUser();
-  const anonId = await getOrCreateAnonId();
 
   let remaining = 10;
   let limit = 10;
@@ -30,17 +29,7 @@ export default async function Header() {
     const used = usage?.used || 0;
     remaining = Math.max(0, limit - used);
   } else {
-    const weekStart = getWeekStart(new Date());
-    const usage = await db.query.creditUsage.findFirst({
-      where: and(
-        eq(creditUsage.ownerType, "anon"),
-        eq(creditUsage.ownerId, anonId),
-        eq(creditUsage.weekStart, weekStart),
-      ),
-    });
-
-    const used = usage?.used || 0;
-    remaining = Math.max(0, 10 - used);
+    remaining = await getAnonRemaining();
   }
 
   return (

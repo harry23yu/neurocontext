@@ -1,5 +1,6 @@
 import "server-only";
-import { cookies } from "next/headers";
+import { createHmac } from "crypto";
+import { cookies, headers } from "next/headers";
 import { sql } from "drizzle-orm";
 import { db } from "./db";
 import { getUser } from "./dal";
@@ -75,7 +76,7 @@ export async function checkAndConsumeCredit({
   cost,
   limit,
 }: {
-  ownerType: "user" | "anon";
+  ownerType: "user" | "anon" | "ip";
   ownerId: string;
   cost: number;
   limit: number;
@@ -97,6 +98,48 @@ export async function checkAndConsumeCredit({
 }
 
 const ANON_WEEKLY_LIMIT = 10;
+const ANON_IP_WEEKLY_LIMIT = 10;
+
+// Stores a keyed hash of the IP address, not the address itself, in credit_usage.
+// The hash is formatted as a UUID because owner_id is a uuid column.
+async function getIpOwnerId(): Promise<string | null> {
+  // On Vercel these headers carry the real client IP; visitors can't override them.
+  const requestHeaders = await headers();
+  const ip =
+    requestHeaders.get("x-real-ip") ??
+    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim();
+  if (!ip) return null;
+
+  const hex = createHmac("sha256", process.env.SESSION_SECRET ?? "")
+    .update(ip)
+    .digest("hex")
+    .slice(0, 32);
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+}
+
+async function getWeeklyUsed(ownerType: "anon" | "ip", ownerId: string): Promise<number> {
+  const rows = await db.execute<{ used: number }>(sql`
+    SELECT used FROM credit_usage
+    WHERE owner_type = ${ownerType} AND owner_id = ${ownerId} AND week_start = ${getWeekStart(new Date())}
+  `);
+  return rows[0]?.used ?? 0;
+}
+
+async function getAnonStatus() {
+  const anonId = await getOrCreateAnonId();
+  const ipId = await getIpOwnerId();
+  const anonUsed = await getWeeklyUsed("anon", anonId);
+  const ipUsed = ipId ? await getWeeklyUsed("ip", ipId) : 0;
+
+  const anonRemaining = ANON_WEEKLY_LIMIT - anonUsed;
+  const ipRemaining = ipId ? ANON_IP_WEEKLY_LIMIT - ipUsed : anonRemaining;
+  return { anonId, ipId, remaining: Math.max(0, Math.min(anonRemaining, ipRemaining)) };
+}
+
+// Credits an anonymous visitor can actually use: the lower of the cookie and IP limits.
+export async function getAnonRemaining(): Promise<number> {
+  return (await getAnonStatus()).remaining;
+}
 
 export async function requireCredit(cost: number): Promise<void> {
   if (cost <= 0) return;
@@ -113,13 +156,26 @@ export async function requireCredit(cost: number): Promise<void> {
     return;
   }
 
-  const anonId = await getOrCreateAnonId();
+  // Check both limits before consuming either, so a refused request doesn't use up credits.
+  const { anonId, ipId, remaining } = await getAnonStatus();
+  if (remaining < cost) {
+    throw new CreditsExhaustedError(true);
+  }
+
   await checkAndConsumeCredit({
     ownerType: "anon",
     ownerId: anonId,
     cost,
     limit: ANON_WEEKLY_LIMIT,
   });
+  if (ipId) {
+    await checkAndConsumeCredit({
+      ownerType: "ip",
+      ownerId: ipId,
+      cost,
+      limit: ANON_IP_WEEKLY_LIMIT,
+    });
+  }
 }
 
 export async function reconcileAnonymousUsageOnLogin(userId: string): Promise<void> {
