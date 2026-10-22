@@ -141,8 +141,23 @@ export async function getAnonRemaining(): Promise<number> {
   return (await getAnonStatus()).remaining;
 }
 
-export async function requireCredit(cost: number): Promise<void> {
-  if (cost <= 0) return;
+// Charges credits and returns a function that gives them back, for use when the
+// AI call fails after the charge.
+export async function requireCredit(cost: number): Promise<() => Promise<void>> {
+  if (cost <= 0) return async () => {};
+
+  const weekStart = getWeekStart(new Date());
+  const charged: { ownerType: "user" | "anon" | "ip"; ownerId: string }[] = [];
+
+  const refund = async () => {
+    for (const { ownerType, ownerId } of charged) {
+      await db.execute(sql`
+        UPDATE credit_usage
+        SET used = GREATEST(used - ${cost}, 0), updated_at = now()
+        WHERE owner_type = ${ownerType} AND owner_id = ${ownerId} AND week_start = ${weekStart}
+      `);
+    }
+  };
 
   const user = await getUser();
   if (user) {
@@ -153,7 +168,8 @@ export async function requireCredit(cost: number): Promise<void> {
       cost,
       limit: planLimits.creditLimit,
     });
-    return;
+    charged.push({ ownerType: "user", ownerId: user.id });
+    return refund;
   }
 
   // Check both limits before consuming either, so a refused request doesn't use up credits.
@@ -168,6 +184,7 @@ export async function requireCredit(cost: number): Promise<void> {
     cost,
     limit: ANON_WEEKLY_LIMIT,
   });
+  charged.push({ ownerType: "anon", ownerId: anonId });
   if (ipId) {
     await checkAndConsumeCredit({
       ownerType: "ip",
@@ -175,7 +192,9 @@ export async function requireCredit(cost: number): Promise<void> {
       cost,
       limit: ANON_IP_WEEKLY_LIMIT,
     });
+    charged.push({ ownerType: "ip", ownerId: ipId });
   }
+  return refund;
 }
 
 export async function reconcileAnonymousUsageOnLogin(userId: string): Promise<void> {

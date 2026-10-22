@@ -45,8 +45,9 @@ export async function POST(request: Request) {
   }
 
   const cost = mode === "context" || mode === "pdf" ? 0 : 1;
+  let refundCredit = async () => {};
   try {
-    await requireCredit(cost);
+    refundCredit = await requireCredit(cost);
   } catch (e) {
     if (e instanceof CreditsExhaustedError) {
       return Response.json(
@@ -66,12 +67,22 @@ export async function POST(request: Request) {
     userMessage = `This text is from: ${context}\n\nUse this context to better understand the text, identify implicit language specific to this source, and reference the source when relevant in your explanations.\n\n${text}`;
   }
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 2000,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
-  });
+  let response;
+  try {
+    response = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 2000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userMessage }],
+    });
+  } catch (e) {
+    await refundCredit();
+    console.error("Explain request failed:", e);
+    return Response.json(
+      { error: "NeuroContext is temporarily unavailable. Please try again later.", code: "SERVICE_UNAVAILABLE" },
+      { status: 503 },
+    );
+  }
 
   const block = response.content.find((b) => b.type === "text");
   if (!block) {

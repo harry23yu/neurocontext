@@ -19,8 +19,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "Missing or empty 'text' field" }, { status: 400 });
   }
 
+  let refundCredit = async () => {};
   try {
-    await requireCredit(3);
+    refundCredit = await requireCredit(3);
   } catch (e) {
     if (e instanceof CreditsExhaustedError) {
       return Response.json(
@@ -40,12 +41,22 @@ export async function POST(request: Request) {
     userMessage = `This text is from: ${context}\n\nUse this context to better understand the text and reference the source when relevant in your summary and key points.\n\n${text}`;
   }
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 2000,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
-  });
+  let response;
+  try {
+    response = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 2000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userMessage }],
+    });
+  } catch (e) {
+    await refundCredit();
+    console.error("Summarize request failed:", e);
+    return Response.json(
+      { error: "NeuroContext is temporarily unavailable. Please try again later.", code: "SERVICE_UNAVAILABLE" },
+      { status: 503 },
+    );
+  }
 
   const block = response.content.find((b) => b.type === "text");
   if (!block) {
