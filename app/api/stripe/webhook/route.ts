@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { db } from "@/app/lib/db";
 import { subscriptions, users } from "@/app/lib/db/schema";
@@ -60,6 +60,20 @@ async function upsertSubscriptionRow(sub: Stripe.Subscription, userId: string) {
     });
 }
 
+// The plan a schedule will switch to: the price of the first phase that hasn't started yet.
+// Works for schedules made by this app and for downgrades scheduled in the Customer Portal.
+function pendingPlanFromSchedule(schedule: Stripe.SubscriptionSchedule) {
+  const now = Math.floor(Date.now() / 1000);
+  const upcoming = schedule.phases.find((phase) => phase.start_date > now);
+  const price = upcoming?.items[0]?.price;
+  if (!price) return null;
+  return getPlanFromPriceId(typeof price === "string" ? price : price.id);
+}
+
+function scheduleSubscriptionId(schedule: Stripe.SubscriptionSchedule) {
+  return typeof schedule.subscription === "string" ? schedule.subscription : schedule.subscription?.id;
+}
+
 export async function POST(request: Request) {
   const body = await request.text();
   const signature = request.headers.get("stripe-signature");
@@ -97,6 +111,44 @@ export async function POST(request: Request) {
 
       const currentPlan = getPlanFromPriceId(sub.items.data[0].price.id);
       if (currentPlan) await applyPlanToUser(row.userId, currentPlan);
+      break;
+    }
+
+    // Schedules can come from this app or from the Customer Portal. Track them so a
+    // pending downgrade shows on the account page and a finished one is cleared.
+    case "subscription_schedule.created":
+    case "subscription_schedule.updated": {
+      const schedule = event.data.object as Stripe.SubscriptionSchedule;
+      const subscriptionId = scheduleSubscriptionId(schedule);
+      if (!subscriptionId) break;
+
+      await db
+        .update(subscriptions)
+        .set({
+          stripeScheduleId: schedule.id,
+          pendingPlan: pendingPlanFromSchedule(schedule),
+          updatedAt: new Date(),
+        })
+        .where(eq(subscriptions.stripeSubscriptionId, subscriptionId));
+      break;
+    }
+
+    case "subscription_schedule.released":
+    case "subscription_schedule.completed": {
+      const schedule = event.data.object as Stripe.SubscriptionSchedule;
+      const subscriptionId = scheduleSubscriptionId(schedule);
+      if (!subscriptionId) break;
+
+      // Only clear if this is still the tracked schedule, so an old event can't wipe a newer one.
+      await db
+        .update(subscriptions)
+        .set({ stripeScheduleId: null, pendingPlan: null, updatedAt: new Date() })
+        .where(
+          and(
+            eq(subscriptions.stripeSubscriptionId, subscriptionId),
+            eq(subscriptions.stripeScheduleId, schedule.id),
+          ),
+        );
       break;
     }
 
