@@ -14,8 +14,10 @@ export default async function AccountPage() {
     where: eq(subscriptions.userId, user.id),
   });
 
-  const renewalDate = subscription
-    ? new Date(subscription.currentPeriodEnd).toLocaleDateString("en-US", {
+  // A canceled subscription has no next billing date, so don't show one.
+  const renewalDate =
+    subscription && subscription.status !== "canceled"
+      ? new Date(subscription.currentPeriodEnd).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",

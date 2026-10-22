@@ -45,15 +45,21 @@ export default function BillingSection({
         </p>
       </div>
 
-      {subscription && renewalDate && (
+      {subscription && renewalDate && subscription.pendingPlan !== "free" && (
         <p style={{ color: "var(--color-muted)", fontSize: 14, margin: 0 }}>
           Renews on {renewalDate}
         </p>
       )}
 
-      {subscription?.pendingPlan && renewalDate && (
+      {subscription?.pendingPlan === "free" && renewalDate && (
         <p style={{ color: "var(--color-accent)", fontSize: 14, margin: 0 }}>
-          Downgrading to {PLAN_LABELS[subscription.pendingPlan as "free" | "silver" | "gold"]} on{" "}
+          Cancels on {renewalDate}
+        </p>
+      )}
+
+      {subscription?.pendingPlan && subscription.pendingPlan !== "free" && renewalDate && (
+        <p style={{ color: "var(--color-accent)", fontSize: 14, margin: 0 }}>
+          Downgrading to {PLAN_LABELS[subscription.pendingPlan as "silver" | "gold"]} on{" "}
           {renewalDate}
         </p>
       )}

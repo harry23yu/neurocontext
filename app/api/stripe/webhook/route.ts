@@ -25,7 +25,18 @@ async function upsertSubscriptionRow(sub: Stripe.Subscription, userId: string) {
     where: eq(subscriptions.userId, userId),
   });
   const scheduleAdvanced = existingRow?.pendingPlan === plan;
-  const pendingPlan = scheduleAdvanced ? null : existingRow?.pendingPlan ?? null;
+  // Cancelling at period end is stored as a pending switch to free. Undoing a cancellation
+  // clears it, but only when no schedule is attached (an app-made free downgrade keeps it).
+  let pendingPlan: string | null;
+  if (sub.cancel_at_period_end) {
+    pendingPlan = "free";
+  } else if (scheduleAdvanced) {
+    pendingPlan = null;
+  } else if (existingRow?.pendingPlan === "free" && !sub.schedule) {
+    pendingPlan = null;
+  } else {
+    pendingPlan = existingRow?.pendingPlan ?? null;
+  }
   const stripeScheduleId = scheduleAdvanced
     ? null
     : typeof sub.schedule === "string"
@@ -66,7 +77,10 @@ function pendingPlanFromSchedule(schedule: Stripe.SubscriptionSchedule) {
   const now = Math.floor(Date.now() / 1000);
   const upcoming = schedule.phases.find((phase) => phase.start_date > now);
   const price = upcoming?.items[0]?.price;
-  if (!price) return null;
+  if (!price) {
+    // No paid phase left: a schedule that cancels at its end is a downgrade to free.
+    return schedule.end_behavior === "cancel" ? ("free" as const) : null;
+  }
   return getPlanFromPriceId(typeof price === "string" ? price : price.id);
 }
 
