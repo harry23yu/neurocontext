@@ -6,6 +6,7 @@ import { db } from "@/app/lib/db";
 import { creditUsage } from "@/app/lib/db/schema";
 import { getPlanLimits } from "@/app/lib/plans";
 import { getWeekStart, getAnonRemaining } from "@/app/lib/credits";
+import TryItLink from "./TryItLink";
 
 export default async function Header() {
   const user = await getUser();
@@ -42,21 +43,24 @@ export default async function Header() {
         borderBottom: "1px solid var(--color-border)",
       }}
     >
-      <Link
-        href="/"
-        style={{
-          color: "var(--color-text)",
-          fontWeight: 600,
-          fontSize: "20px",
-          textDecoration: "none",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-        }}
-      >
-        <img src="/favicon.svg" alt="" width={32} height={32} />
-        NeuroContext
-      </Link>
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <Link
+          href="/"
+          style={{
+            color: "var(--color-text)",
+            fontWeight: 600,
+            fontSize: "20px",
+            textDecoration: "none",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <img src="/favicon.svg" alt="" width={32} height={32} />
+          NeuroContext
+        </Link>
+        <TryItLink />
+      </div>
 
       <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: "150px", paddingTop: "5px"}}>
