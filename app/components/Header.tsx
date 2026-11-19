@@ -34,16 +34,8 @@ export default async function Header() {
   }
 
   return (
-    <header
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "1rem 1.5rem",
-        borderBottom: "1px solid var(--color-border)",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+    <header className="site-header">
+      <div className="site-header-brand">
         <Link
           href="/"
           style={{
@@ -62,8 +54,8 @@ export default async function Header() {
         <TryItLink />
       </div>
 
-      <nav style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", minWidth: "150px", paddingTop: "5px"}}>
+      <nav className="site-header-nav">
+        <div className="credit-meter" style={{ display: "flex", flexDirection: "column", gap: "0.25rem", paddingTop: "5px" }}>
           <div
             style={{
               display: "flex",

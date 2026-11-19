@@ -38,3 +38,49 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Site header layout */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.site-header-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.credit-meter {
+  min-width: 150px;
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .site-header-nav {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+  }
+
+  .credit-meter {
+    order: -1;
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+}

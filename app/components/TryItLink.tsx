@@ -18,6 +18,7 @@ export default function TryItLink() {
         borderRadius: "var(--radius-sm)",
         textDecoration: "none",
         fontWeight: 600,
+        whiteSpace: "nowrap",
       }}
     >
       Try it here
